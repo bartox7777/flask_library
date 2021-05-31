@@ -12,4 +12,5 @@ dist/
 build/
 *.egg-info/
 
-init_venv.*
+init_venv.ps1
+.env
