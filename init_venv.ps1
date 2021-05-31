@@ -1,3 +1,3 @@
 .\venv\Scripts\activate
-$env:FLASK_APP = "app"
-$env:FLASK_APP = "development"
+$env:FLASK_APP = "app:create_app('development')"
+$env:FLASK_ENV = "development"

@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Gentium+Book+Basic:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+body{
+    font-family: 'Gentium Book Basic';
+    font-size: larger;
+    background-image: url("dot-grid.png");
+}
+
+button[type="submit"]{
+    font-weight: bold;
+}
+
+.footer{
+    position: absolute;
+    bottom: 0;
+}
+
+footer a{
+    text-decoration: none;
+    color: #88cae9;
+}
