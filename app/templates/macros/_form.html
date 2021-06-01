@@ -1,0 +1,17 @@
+{% macro render_floating_input(field) %}
+    <div class="form-floating mb-3">
+        {{ field(class="form-control", placeholder="name@example.pl", **kwargs)|safe }}
+        {{ field.label }}
+    </div>
+        <ul class="errors">
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endif %}
+        </ul>
+{% endmacro %}
+
+{% macro render_submit(field) %}
+    {{ field(class="btn btn-secondary", **kwargs)|safe }}
+{% endmacro %}

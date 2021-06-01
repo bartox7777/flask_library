@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% from "macros/_form.html" import render_floating_input %}
+{% from "macros/_form.html" import render_submit %}
 
 {% block content %}
 <div class="container">
@@ -10,15 +12,9 @@
     <div class="d-flex justify-content-center mt-5">
       <form class="border border-3 rounded ps-5 pe-5 p-3 bg-light" method="POST">
         {{ form.csrf_token }}
-        <div class="mb-3">
-          {{ form.email.label }} <br>
-          {{ form.email }}
-        </div>
-        <div class="mb-3">
-          {{ form.password.label }} <br>
-          {{ form.password }}
-        </div>
-        {{ form.submit }}
+        {{ render_floating_input(form.email) }}
+        {{ render_floating_input(form.password) }}
+        {{ render_submit(form.submit) }}
       </form>
     </div>
   </div>
