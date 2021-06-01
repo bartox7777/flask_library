@@ -1,6 +1,8 @@
 from flask_login import UserMixin
 
-import datetime
+from datetime import datetime
+
+from sqlalchemy.orm import backref
 
 from . import db
 
@@ -42,9 +44,16 @@ class Role(db.Model):
 class Book(db.Model):
     isbn = db.Column(db.String, primary_key=True)
     title = db.Column(db.String, nullable=False)
-    author = db.Column(db.String, db.ForeignKey("author.id"), nullable=False)
+    author_id = db.Column(db.String, db.ForeignKey("author.id"), nullable=False)
     publisher = db.Column(db.String)
     pages = db.Column(db.Integer)
+    year = db.Column(db.Integer)
+
+
+class Author(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String, nullable=False)
+    books = db.relationship("Book", backref="author")
 
 
 class Borrow(db.Model):
@@ -53,3 +62,4 @@ class Borrow(db.Model):
     book_id = db.Column(db.Integer, db.ForeignKey("book.isbn"), nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     prolong_times = db.Column(db.Integer, default=datetime.utcnow, nullable=False)
+    return_date = db.Column(db.DateTime, default=None)
