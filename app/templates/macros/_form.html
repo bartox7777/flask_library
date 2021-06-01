@@ -1,15 +1,15 @@
 {% macro render_floating_input(field) %}
     <div class="form-floating mb-3">
+        {% if field.errors %}
+            {{ field(class="form-control is-invalid", placeholder="name@example.pl", **kwargs)|safe }}
+            {% for error in field.errors %}
+                <span class="text-muted fs-6">{{ error }}</span><br>
+            {% endfor %}
+        {% else %}
         {{ field(class="form-control", placeholder="name@example.pl", **kwargs)|safe }}
+        {% endif %}
         {{ field.label }}
     </div>
-        <ul class="errors">
-            {% if field.errors %}
-                {% for error in field.errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            {% endif %}
-        </ul>
 {% endmacro %}
 
 {% macro render_submit(field) %}

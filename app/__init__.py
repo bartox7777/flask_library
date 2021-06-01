@@ -4,12 +4,14 @@ from flask import url_for
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_babel import Babel
 
 from config import config
 
 
 db = SQLAlchemy()
 login_manager = LoginManager()
+babel = Babel()
 
 def create_app(config_name="production"):
     app = Flask(__name__)
@@ -18,6 +20,7 @@ def create_app(config_name="production"):
 
     db.init_app(app)
     # login_manager.init_app(app)
+    babel.init_app(app)
 
     @app.route("/")
     def redirect_to_login():
