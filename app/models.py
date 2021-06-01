@@ -2,8 +2,6 @@ from flask_login import UserMixin
 
 import datetime
 
-from sqlalchemy.orm import backref
-
 from . import db
 
 
@@ -24,7 +22,7 @@ class PersonalData(db.Model):
     surname = db.Column(db.String, nullable=False)
     phone_number = db.Column(db.String, unique=True)
     extended_city = db.Column(db.String)  # city with postal code
-    extended_street = db.Column(db.String) # street with home number
+    extended_street = db.Column(db.String)  # street with home number
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
 
@@ -41,5 +39,17 @@ class Role(db.Model):
     users = db.relationship("User", backref="role")
 
 
+class Book(db.Model):
+    isbn = db.Column(db.String, primary_key=True)
+    title = db.Column(db.String, nullable=False)
+    author = db.Column(db.String, db.ForeignKey("author.id"), nullable=False)
+    publisher = db.Column(db.String)
+    pages = db.Column(db.Integer)
+
+
 class Borrow(db.Model):
-    pass
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.isbn"), nullable=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    prolong_times = db.Column(db.Integer, default=datetime.utcnow, nullable=False)
