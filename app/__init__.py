@@ -31,9 +31,9 @@ def create_app(config_name="production"):
         return models.User.query.get(int(user_id))
 
     from .cli import init_db
-    from .cli import insert_fake_data
+    from .cli import insert_test_data
     app.cli.add_command(init_db)
-    app.cli.add_command(insert_fake_data)
+    app.cli.add_command(insert_test_data)
 
     @app.route("/")
     def redirect_to_login():

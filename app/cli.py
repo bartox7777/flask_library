@@ -25,6 +25,7 @@ def init_db():
 @click.option("--additional-users", default=10, help="Number of additional users.")
 @with_appcontext
 def insert_test_data(additional_users):
+    # USER
     role_user_id = Role.query.filter_by(name="user").first().id
     role_moderator_id = Role.query.filter_by(name="moderator").first().id
     role_admin_id = Role.query.filter_by(name="admin").first().id
@@ -36,11 +37,24 @@ def insert_test_data(additional_users):
 
     db.session.add_all([test_admin, test_moderator, test_user, test_user_inactive])
 
+    # PERSONAL DATA
     fake = Faker()
     for _ in range(additional_users):
         user = User(email=fake.unique.ascii_email(), password="test", activated=True, role_id=role_user_id)
-        print(user)
         db.session.add(user)
     fake.unique.clear()
+
+    db.session.commit()
+
+    for user in User.query.all():
+        user_personal_data = PersonalData(
+            name=fake.first_name(),
+            surname=fake.last_name(),
+            phone_number=fake.phone_number(),
+            extended_city=f"{fake.postcode()} {fake.city()}",
+            extended_street=fake.street_address(),
+            user_id=user.id
+        )
+        db.session.add(user_personal_data)
 
     db.session.commit()
