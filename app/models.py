@@ -17,6 +17,9 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
 
+    def is_active(self):
+        return self.activated
+
     @property
     def password(self):
         raise AttributeError("It is write only attribute.")
