@@ -16,3 +16,5 @@ init_venv.ps1
 .env
 
 data-dev.sqlite
+
+migrations/

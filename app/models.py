@@ -2,20 +2,32 @@ from flask_login import UserMixin
 
 from datetime import datetime
 
-from sqlalchemy.orm import backref
-
 from . import db
+from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
 
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, nullable=False, unique=True)
     personal_data = db.relationship("PersonalData", backref="user")
-    password = db.Column(db.String, nullable=False)
+    password_hash = db.Column(db.String, nullable=False)
     activated = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
+
+    @property
+    def password(self):
+        raise AttributeError("It is write only attribute.")
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
 
 
 class PersonalData(db.Model):
@@ -39,6 +51,18 @@ class Role(db.Model):
     name = db.Column(db.String, nullable=False, unique=True)
     permissions = db.Column(db.Integer, nullable=False)
     users = db.relationship("User", backref="role")
+
+    @staticmethod
+    def insert_roles():
+        roles = dict(
+            user=[Permission.USER],
+            moderator=[Permission.USER, Permission.MODERATOR],
+            admin=[Permission.USER, Permission.MODERATOR, Permission.ADMIN]
+        )
+        for name, permissions in roles.items():
+            role = Role(name=name, permissions=sum(permissions))
+            db.session.add(role)
+        db.session.commit()
 
 
 class Book(db.Model):
