@@ -69,9 +69,13 @@ class Role(db.Model):
 
 
 class Book(db.Model):
-    isbn = db.Column(db.String, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    isbn = db.Column(db.String, nullable=False)
     title = db.Column(db.String, nullable=False)
+    description = db.Column(db.Text)
     author_id = db.Column(db.String, db.ForeignKey("author.id"), nullable=False)
+    number_of_copies = db.Column(db.Integer, nullable=False)
+    cover = db.Column(db.PickleType)
     publisher = db.Column(db.String)
     pages = db.Column(db.Integer)
     year = db.Column(db.Integer)
@@ -88,5 +92,5 @@ class Borrow(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey("book.isbn"), nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    prolong_times = db.Column(db.Integer, default=datetime.utcnow, nullable=False)
+    prolong_times = db.Column(db.Integer, default=0, nullable=False)
     return_date = db.Column(db.DateTime, default=None)
