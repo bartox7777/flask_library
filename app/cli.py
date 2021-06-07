@@ -11,11 +11,15 @@ from flask_migrate import upgrade
 
 
 @click.command()
+@click.option("--test", is_flag=True)
 @with_appcontext
-def init_db():
-    init()
-    migrate()
-    upgrade()
+def init_db(test):
+    if not test:
+        init()
+        migrate()
+        upgrade()
+    else:
+        db.create_all()
 
     Role.insert_roles()
 
@@ -85,3 +89,9 @@ def insert_test_data(additional_users, books):
     borrow = Borrow(user_id=test_user.id, book_id=book.id)
     db.session.add(borrow)
     db.session.commit()
+
+@click.command()
+def test():
+    import unittest
+    tests = unittest.TestLoader().discover("tests")
+    unittest.TextTestRunner().run(tests)

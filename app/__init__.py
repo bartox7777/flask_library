@@ -1,6 +1,4 @@
 from flask import Flask
-from flask import redirect
-from flask import url_for
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -32,16 +30,16 @@ def create_app(config_name="production"):
 
     from .cli import init_db
     from .cli import insert_test_data
+    from .cli import test
     app.cli.add_command(init_db)
     app.cli.add_command(insert_test_data)
+    app.cli.add_command(test)
 
-    @app.route("/")
-    def redirect_to_login():
-        return redirect(url_for("auth.login"))
 
     from .auth import auth
+    from .main import main
     app.register_blueprint(auth)
-
-    # app.add_url_rule("/", endpoint="auth.login")
+    app.register_blueprint(main)
+    app.add_url_rule("/", endpoint="main.index")
 
     return app
