@@ -73,6 +73,7 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     isbn = db.Column(db.String, nullable=False)
     title = db.Column(db.String, nullable=False)
+    category = db.Column(db.String)
     description = db.Column(db.Text)
     author_id = db.Column(db.String, db.ForeignKey("author.id"), nullable=False)
     number_of_copies = db.Column(db.Integer, nullable=False)
