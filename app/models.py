@@ -42,9 +42,13 @@ class Role(db.Model):
 class Book(db.Model):
     isbn = db.Column(db.String, primary_key=True)
     title = db.Column(db.String, nullable=False)
+    category = db.Column(db.String)
     author = db.Column(db.String, db.ForeignKey("author.id"), nullable=False)
     publisher = db.Column(db.String)
     pages = db.Column(db.Integer)
+
+
+
 
 
 class Borrow(db.Model):
