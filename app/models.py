@@ -16,6 +16,7 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
+    borrows = db.relationship("Borrow", backref="user")
 
     def is_active(self):
         return self.activated
@@ -79,6 +80,7 @@ class Book(db.Model):
     publisher = db.Column(db.String)
     pages = db.Column(db.Integer)
     year = db.Column(db.Integer)
+    borrows = db.relationship("Borrow", backref="book")
 
 
 class Author(db.Model):
@@ -90,7 +92,7 @@ class Author(db.Model):
 class Borrow(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    book_id = db.Column(db.Integer, db.ForeignKey("book.isbn"), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     prolong_times = db.Column(db.Integer, default=0, nullable=False)
     return_date = db.Column(db.DateTime, default=None)

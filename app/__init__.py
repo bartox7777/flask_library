@@ -13,6 +13,8 @@ login_manager = LoginManager()
 babel = Babel()
 migrate = Migrate()
 
+login_manager.login_view = "auth.login"
+
 def create_app(config_name="production"):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
@@ -28,6 +30,18 @@ def create_app(config_name="production"):
     def load_user(user_id):
         return models.User.query.get(int(user_id))
 
+    @app.shell_context_processor
+    def shell_context():
+        return dict(
+            db = db,
+            User = models.User,
+            Role = models.Role,
+            PersonalData = models.PersonalData,
+            Author = models.Author,
+            Book = models.book,
+            Borrow = models.Borrow
+        )
+
     from .cli import init_db
     from .cli import insert_test_data
     from .cli import test
@@ -40,6 +54,5 @@ def create_app(config_name="production"):
     from .main import main
     app.register_blueprint(auth)
     app.register_blueprint(main)
-    app.add_url_rule("/", endpoint="main.index")
 
     return app

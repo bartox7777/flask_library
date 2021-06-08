@@ -79,6 +79,7 @@ def insert_test_data(additional_users, books):
             description=fake.text(max_nb_chars=200),
             author_id=author_with_books.id,
             number_of_copies=fake.random_digit_not_null(),
+            # TODO: insert cover
             publisher=fake.word().capitalize(),
             pages=fake.random_digit_not_null()*100,
             year=int(fake.year())
@@ -89,9 +90,10 @@ def insert_test_data(additional_users, books):
     borrow = Borrow(user_id=test_user.id, book_id=book.id)
     db.session.add(borrow)
     db.session.commit()
+    click.echo("Inserted test data.")
 
 @click.command()
 def test():
     import unittest
     tests = unittest.TestLoader().discover("tests")
-    unittest.TextTestRunner().run(tests)
+    unittest.TextTestRunner(verbosity=2).run(tests)
