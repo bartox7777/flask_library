@@ -1,19 +1,37 @@
 from flask_login import UserMixin
 
-import datetime
+from datetime import datetime
 
 from . import db
+from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
 
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, nullable=False, unique=True)
     personal_data = db.relationship("PersonalData", backref="user")
-    password = db.Column(db.String, nullable=False)
+    password_hash = db.Column(db.String, nullable=False)
     activated = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
+    borrows = db.relationship("Borrow", backref="user")
+
+    def is_active(self):
+        return self.activated
+
+    @property
+    def password(self):
+        raise AttributeError("It is write only attribute.")
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
 
 
 class PersonalData(db.Model):
@@ -38,14 +56,37 @@ class Role(db.Model):
     permissions = db.Column(db.Integer, nullable=False)
     users = db.relationship("User", backref="role")
 
+    @staticmethod
+    def insert_roles():
+        roles = dict(
+            user=[Permission.USER],
+            moderator=[Permission.USER, Permission.MODERATOR],
+            admin=[Permission.USER, Permission.MODERATOR, Permission.ADMIN]
+        )
+        for name, permissions in roles.items():
+            role = Role(name=name, permissions=sum(permissions))
+            db.session.add(role)
+        db.session.commit()
+
 
 class Book(db.Model):
-    isbn = db.Column(db.String, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    isbn = db.Column(db.String, nullable=False)
     title = db.Column(db.String, nullable=False)
-    category = db.Column(db.String)
-    author = db.Column(db.String, db.ForeignKey("author.id"), nullable=False)
+    description = db.Column(db.Text)
+    author_id = db.Column(db.String, db.ForeignKey("author.id"), nullable=False)
+    number_of_copies = db.Column(db.Integer, nullable=False)
+    cover = db.Column(db.PickleType)
     publisher = db.Column(db.String)
     pages = db.Column(db.Integer)
+    year = db.Column(db.Integer)
+    borrows = db.relationship("Borrow", backref="book")
+
+
+class Author(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String, nullable=False)
+    books = db.relationship("Book", backref="author")
 
 
 
@@ -54,6 +95,7 @@ class Book(db.Model):
 class Borrow(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    book_id = db.Column(db.Integer, db.ForeignKey("book.isbn"), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    prolong_times = db.Column(db.Integer, default=datetime.utcnow, nullable=False)
+    prolong_times = db.Column(db.Integer, default=0, nullable=False)
+    return_date = db.Column(db.DateTime, default=None)

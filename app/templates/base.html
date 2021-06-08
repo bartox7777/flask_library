@@ -16,6 +16,13 @@
             <title>LIB</title>
         {% endif %}
     </head>
+        <div class="container">
+            {% for message in get_flashed_messages(with_categories=True) %}
+                <div class="alert alert-{{ message[0] }} mt-5">
+                    {{ message[1] }}
+                </div>
+            {% endfor %}
+        </div>
         {% block content %}{% endblock content %}
         <footer class="footer bg-dark w-100 p-2">
             <div class="container text-light text-center">Wszelkie prawa zastrzeżone &copy; <a href="https://github.com/bartox7777">bartox;</a> 2021</div>
