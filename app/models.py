@@ -90,9 +90,6 @@ class Author(db.Model):
     books = db.relationship("Book", backref="author")
 
 
-
-
-
 class Borrow(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)

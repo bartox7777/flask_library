@@ -1,6 +1,7 @@
 import unittest
 
 from app import create_app
+from app.models import User
 
 
 class ClientTestCase(unittest.TestCase):
@@ -20,3 +21,16 @@ class ClientTestCase(unittest.TestCase):
     def test_search_page(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
+        # TODO: check some keyword from page
+
+    def test_auth_pages(self):
+        response = self.client.post("/login", data=dict(
+            email="test@test.user",
+            password="test"),
+            follow_redirects=True
+        )
+        self.assertEqual(response.status_code, 200)
+        # TODO: use session to get id or g to get user object
+        test_user = User.query.filter_by(email="test@test.user").first()
+        full_name = test_user.personal_data[0].name + " " + test_user.personal_data[0].surname
+        self.assertTrue(full_name in response.get_data(as_text=True))
