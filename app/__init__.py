@@ -14,6 +14,8 @@ babel = Babel()
 migrate = Migrate()
 
 login_manager.login_view = "auth.login"
+login_manager.login_message = "Zaloguj się, aby mieć dostęp do tej strony."
+login_manager.login_message_category = "warning"
 
 def create_app(config_name="production"):
     app = Flask(__name__)

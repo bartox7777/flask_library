@@ -1,5 +1,7 @@
 import unittest
 
+from flask_login import current_user
+
 from app import create_app
 from app.models import User
 
@@ -29,8 +31,8 @@ class ClientTestCase(unittest.TestCase):
             password="test"),
             follow_redirects=True
         )
+        # TODO: is it possible to use current_user?
         self.assertEqual(response.status_code, 200)
-        # TODO: use session to get id or g to get user object
         test_user = User.query.filter_by(email="test@test.user").first()
         full_name = test_user.personal_data[0].name + " " + test_user.personal_data[0].surname
         self.assertTrue(full_name in response.get_data(as_text=True))

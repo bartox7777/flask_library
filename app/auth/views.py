@@ -1,26 +1,25 @@
-from flask import g
+
 from flask import flash
 from flask import url_for
-from flask import session
+from flask import request
 from flask import redirect
 from flask import render_template
+
+from flask_login import login_user
+from flask_login import logout_user
+from flask_login import current_user
+from flask_login import login_required
 
 from . import auth
 from ..models import User
 from .forms import LoginForm
 
 
-@auth.before_app_request
-def load_logged_user():
-    user_id = session.get("user_id")
-
-    if user_id:
-        g.user = User.query.get(user_id)
-    else:
-        g.user = None
-
 @auth.route("/login", methods=("GET", "POST"))
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.search"))
+
     form = LoginForm()
     if form.validate_on_submit():
         email = form.email.data
@@ -28,13 +27,24 @@ def login():
 
         user = User.query.filter_by(email=email).first()
         if user and user.verify_password(password):
+            login_user(user)
             personal_data = user.personal_data[0]
             name, surname = personal_data.name, personal_data.surname
             flash(f"Użytkownik {name} {surname} zalogowany pomyślnie.", "success")
-            return redirect(url_for("main.search"))
+
+            next = request.args.get("next") # HACK: is next always safe?
+
+            return redirect(next or url_for("main.search"))
 
         form.password.data = ""
         flash("Nieprawidłowe dane logowania.", "warning")
 
 
-    return render_template("auth/login.html", title="Login", form=form)
+    return render_template("auth/login.html", title="Login", form=form, dont_show_footer=True)
+
+@auth.route("/logout", methods=("GET", "POST"))
+@login_required
+def logout():
+    flash("Pomyślnie wylogowano.", "success")
+    logout_user()
+    return redirect(url_for("main.search"))

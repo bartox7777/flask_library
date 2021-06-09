@@ -18,3 +18,5 @@ init_venv.ps1
 data-dev.sqlite
 
 migrations/
+
+.vscode
