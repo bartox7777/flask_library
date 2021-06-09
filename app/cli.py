@@ -1,3 +1,4 @@
+from flask import current_app
 from flask.cli import with_appcontext
 
 import click
@@ -11,10 +12,9 @@ from flask_migrate import upgrade
 
 
 @click.command()
-@click.option("--test", is_flag=True)
 @with_appcontext
-def init_db(test):
-    if not test:
+def init_db():
+    if not current_app.config["TESTING"]:
         init()
         migrate()
         upgrade()

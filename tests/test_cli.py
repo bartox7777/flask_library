@@ -16,7 +16,7 @@ class CLITestCase(unittest.TestCase):
         self.app_context.pop()
 
     def test_init_db(self):
-        result = self.runner.invoke(args=["init-db", "--test"])
+        result = self.runner.invoke(args=["init-db"])
         self.assertTrue("Database initialized." == result.output.strip())
 
         roles = ["user", "moderator", "admin"]
@@ -28,7 +28,7 @@ class CLITestCase(unittest.TestCase):
         additional_users_number = random.randint(20, 50)
         books_number = random.randint(10, 30)
 
-        self.runner.invoke(args=["init-db", "--test"])
+        self.runner.invoke(args=["init-db"])
         self.runner.invoke(args=["insert-test-data", "--additional-users", additional_users_number, "--books", books_number])
 
         random_user = random.choice(User.query.all())
