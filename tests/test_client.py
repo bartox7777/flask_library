@@ -31,7 +31,6 @@ class ClientTestCase(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue(login_manager.login_message in response.get_data(as_text=True))
 
-
         with self.client as client:
             response = client.post("/login", data=dict(
             email="test@test.user",
