@@ -2,9 +2,9 @@ import unittest
 
 from flask_login import current_user
 
-from app import create_app
-from app.models import User
 
+from app import create_app
+from app import login_manager
 
 class ClientTestCase(unittest.TestCase):
     pass
@@ -23,16 +23,33 @@ class ClientTestCase(unittest.TestCase):
     def test_search_page(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
-        # TODO: check some keyword from page
+        self.assertTrue(b"Zaloguj" in response.get_data())
 
     def test_auth_pages(self):
-        response = self.client.post("/login", data=dict(
+        with self.client as client:
+            response = client.get("logout", follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(login_manager.login_message in response.get_data(as_text=True))
+
+
+        with self.client as client:
+            response = client.post("/login", data=dict(
             email="test@test.user",
             password="test"),
-            follow_redirects=True
-        )
-        # TODO: is it possible to use current_user?
-        self.assertEqual(response.status_code, 200)
-        test_user = User.query.filter_by(email="test@test.user").first()
-        full_name = test_user.personal_data[0].name + " " + test_user.personal_data[0].surname
-        self.assertTrue(full_name in response.get_data(as_text=True))
+            follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            full_name = f"{current_user.personal_data[0].name} {current_user.personal_data[0].surname}"
+            self.assertTrue(full_name in response.get_data(as_text=True))
+            self.assertTrue(b"Wyloguj" in response.get_data())
+
+            response = client.get("logout", follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("Pomyślnie wylogowano." in response.get_data(as_text=True))
+            self.assertTrue(b"Zaloguj" in response.get_data())
+
+            response = client.post("/login", data=dict(
+            email="test@test.X",
+            password="X"),
+            follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("Nieprawidłowe dane logowania." in response.get_data(as_text=True))
