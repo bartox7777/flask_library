@@ -19,4 +19,4 @@ data-dev.sqlite
 
 migrations/
 
-.vscode
+.vscode/
