@@ -78,7 +78,7 @@ class Book(db.Model):
     author_id = db.Column(db.String, db.ForeignKey("author.id"), nullable=False)
     add_date = db.Column(db.DateTime, default=datetime.utcnow)
     number_of_copies = db.Column(db.Integer, nullable=False)
-    cover = db.Column(db.PickleType)
+    cover = db.Column(db.LargeBinary)
     publisher = db.Column(db.String)
     pages = db.Column(db.Integer)
     year = db.Column(db.Integer)

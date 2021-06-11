@@ -40,7 +40,7 @@ def create_app(config_name="production"):
             Role = models.Role,
             PersonalData = models.PersonalData,
             Author = models.Author,
-            Book = models.book,
+            Book = models.Book,
             Borrow = models.Borrow
         )
 

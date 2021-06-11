@@ -1,8 +1,11 @@
 from flask import current_app
 from flask.cli import with_appcontext
 
+import os
 import click
 from faker import Faker
+from random import randint
+from random import choice
 
 from . import db
 from .models import *
@@ -72,18 +75,24 @@ def insert_test_data(additional_users, books):
     db.session.add_all([author_no_books, author_with_books])
     db.session.commit()
 
+    categories = ["Fantasy", "IT", "Literature", "Math"]
+
     for _ in range(books):
+        path = os.path.join(os.getcwd(), f"tests/images/{randint(1, 4)}.jpg")
+        cover = open(path, "rb")
         book = Book(
             isbn=fake.isbn10(),
             title=fake.text(max_nb_chars=20)[:-1],
             description=fake.text(max_nb_chars=200),
+            category=choice(categories),
             author_id=author_with_books.id,
             number_of_copies=fake.random_digit_not_null(),
-            # TODO: insert cover
+            cover=cover.read(),
             publisher=fake.word().capitalize(),
             pages=fake.random_digit_not_null()*100,
             year=int(fake.year())
         )
+        cover.close()
         db.session.add(book)
     db.session.commit()
 

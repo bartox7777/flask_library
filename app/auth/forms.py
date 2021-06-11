@@ -1,5 +1,4 @@
 from flask_wtf import FlaskForm
-from flask_wtf.recaptcha import validators
 from wtforms.fields.html5 import EmailField
 from wtforms import PasswordField
 from wtforms import SubmitField
