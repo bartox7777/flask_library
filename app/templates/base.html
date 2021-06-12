@@ -49,7 +49,10 @@
         {% endfor %}
     </div>
     {% block content %}{% endblock content %}
-    <footer class="footer bg-dark w-100 p-2">
+    <!-- TODO: class footer don't work properly -->
+    <!-- fixed-bottom isn't the best idea -->
+    <!-- temporary solution -->
+    <footer class="bg-dark p-2 w-100 fixed-bottom">
         <div class="container text-light text-center">Wszelkie prawa zastrzeżone &copy; <a
                 href="https://github.com/bartox7777">bartox;</a> 2021</div>
     </footer>

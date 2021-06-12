@@ -11,7 +11,7 @@ button[type="submit"]{
 }
 
 .footer{
-    position: absolute;
+    position: sticky;
     bottom: 0;
 }
 

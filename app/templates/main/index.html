@@ -3,17 +3,25 @@
 {% from "macros/_form.html" import render_submit %}
 
 {% block content %}
-    <div class="container mt-5 p-5 bg-light border">
-        <h2 class="text-center mb-3">Szukaj w księgozbiorze</h2>
-        <div class="border-top"></div>
-        <form class="mt-4">
-            {{ form.csrf_token }}
-            {{ render_floating_input(form.phrase) }}
-            {{ render_submit(form.submit, class="btn btn-secondary float-end") }}
-        </form>
+<div class="container mt-5 p-5 bg-light border">
+    <h2 class="text-center mb-3">Szukaj w księgozbiorze</h2>
+    <div class="border-top"></div>
+    <form class="mt-4">
+        {{ form.csrf_token }}
+        {{ render_floating_input(form.phrase) }}
+        {{ render_submit(form.submit, class="btn btn-secondary float-end") }}
+    </form>
+</div>
+<div class="container bg-light mt-3 p-5 border">
+    <h2 class="text-center mb-3">Ostatnio dodane książki</h2>
+    <div class="border-top"></div>
+    <div class="text-center d-flex flex-wrap justify-content-around mt-3">
+        {% for book, cover in newest_books %}
+            <div>
+                {{ cover|safe }} <br>
+                {{ book.title }}
+            </div>
+        {% endfor %}
     </div>
-    <div class="container bg-light mt-3 p-5 border">
-        <h2 class="text-center mb-3">Ostatnio dodane książki</h2>
-        <div class="border-top"></div>
-    </div>
+</div>
 {% endblock content %}
