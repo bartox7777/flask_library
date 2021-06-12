@@ -1,7 +1,15 @@
 {% extends "base.html" %}
+{% from "macros/_form.html" import render_floating_input %}
+{% from "macros/_form.html" import render_submit %}
 
 {% block content %}
-    <div class="container">
-        panel wyszukiwania
+    <div class="container mt-5 p-5 bg-light border">
+        <h2 class="text-center mb-3">Szukaj w księgozbiorze</h2>
+        <div class="border-top"></div>
+        <form method="post" class="mt-4">
+            {{ form.csrf_token }}
+            {{ render_floating_input(form.phrase) }}
+            {{ render_submit(form.submit, class="btn btn-secondary float-end") }}
+        </form>
     </div>
 {% endblock content %}

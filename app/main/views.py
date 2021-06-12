@@ -1,4 +1,6 @@
-from operator import ne
+from flask import url_for
+from flask import request
+from flask import redirect
 from flask import render_template
 
 import io
@@ -13,9 +15,13 @@ from ..models import Book
 @main.route("/", methods=("GET", "POST"))
 def index():
     form = SearchForm()
+    if form.validate_on_submit():
+        phrase = form.phrase.data
+        if phrase:
+            return redirect(url_for("main.search", phrase=phrase))
+
     newest_books = Book.query.order_by(Book.add_date.desc()).limit(5).all()
     processed_covers = []
-
     # cover processing
     for book in newest_books:
         # cover_file_like = io.BytesIO(book.cover)
@@ -32,4 +38,6 @@ def index():
 
 @main.route("/search", methods=("GET", "POST"))
 def search():
-    return render_template("main/search.html", title="Panel wyszukiwania")
+    form = SearchForm()
+    form.phrase.data = request.args.get("phrase", "")
+    return render_template("main/search.html", title="Panel wyszukiwania", form=form)
