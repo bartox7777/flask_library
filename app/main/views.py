@@ -1,4 +1,3 @@
-from operator import ne
 from flask import render_template
 
 import io
