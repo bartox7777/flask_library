@@ -18,7 +18,7 @@ from .forms import LoginForm
 @auth.route("/login", methods=("GET", "POST"))
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for("main.search"))
+        return redirect(url_for("main.index"))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -34,7 +34,7 @@ def login():
 
             next = request.args.get("next") # HACK: is next always safe?
 
-            return redirect(next or url_for("main.search"))
+            return redirect(next or url_for("main.index"))
 
         form.password.data = ""
         flash("Nieprawidłowe dane logowania.", "warning")
@@ -47,4 +47,4 @@ def login():
 def logout():
     flash("Pomyślnie wylogowano.", "success")
     logout_user()
-    return redirect(url_for("main.search"))
+    return redirect(url_for("main.index"))

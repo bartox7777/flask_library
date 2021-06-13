@@ -13,15 +13,15 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
         {% if title %}
-        <title>LIB - {{ title }}</title>
+        <title>LIBsys - {{ title }}</title>
         {% else %}
-        <title>LIB</title>
+        <title>LIBsys</title>
         {% endif %}
     </head>
     {% if not dont_show_footer %}
     <nav class="container navbar navbar-expand-lg navbar-light bg-light ps-5 pe-5 border border-top-0 border-secondary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#"><span
+            <a class="navbar-brand" href="{{ url_for('main.index') }}"><span
                     class="bg-dark text-light p-1 fs-2 font-monospace">LIB<sup>sys</sup></span></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
                 aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">

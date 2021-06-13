@@ -1,7 +1,44 @@
 {% extends "base.html" %}
+{% from "macros/_form.html" import render_floating_input %}
+{% from "macros/_form.html" import render_submit %}
 
 {% block content %}
-    <div class="container">
-        panel wyszukiwania
+    <div class="container mt-5 p-5 bg-light border">
+        <h2 class="text-center mb-3">Szukaj w księgozbiorze</h2>
+        <div class="border-top"></div>
+        <form method="post" class="mt-4">
+            {{ form.csrf_token }}
+            {{ render_floating_input(form.phrase) }}
+            {{ render_submit(form.submit, class="btn btn-secondary float-end") }}
+        </form>
+    </div>
+    <div class="container bg-light mt-3 p-5 border">
+        <h2 class="text-center mb-3">Znalezione książki</h2>
+        <div class="border-top"></div>
+        <div class="d-flex flex-column mt-3">
+            {% if found_books %}
+                {% for book, cover in found_books %}
+                    <div class="d-flex flex-wrap shadow-sm m-3 p-3">
+                        {{ cover|safe }}
+                        <div>
+                            <div class="d-flex">
+                                <div class="fw-bold font-monospace m-3 fs-3">{{ book.title }}</div>
+                                <div class="m-3 fs-3 font-monospace"> | {{ book.author.full_name }}</div>
+                            </div>
+                            <br>
+                            <span class="m-3">Wydawnictwo: {{ book.publisher }}</span>
+                            <br>
+                            <span class="m-3">Rok wydania: {{ book.year }}</span>
+                            <br>
+                            <span class="m-3">Liczba stron: {{ book.pages }}</span>
+                            <br>
+                            <span class="m-3">Gatunek: {{ book.category }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+                {% else %}
+                <h2 class="text-muted">Nic nie znaleziono...</h2>
+            {% endif %}
+        </div>
     </div>
 {% endblock content %}
