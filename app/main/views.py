@@ -75,9 +75,6 @@ def book_details(id):
         if phrase:
             return redirect(url_for("main.search", phrase=phrase))
 
-    book = Book.query.get(id)
-    if book:
-        cover = process_covers([book])[0][1]
-        return render_template("main/book_details.html", title="Szczegóły ksiązki", book=book, form=form, cover=cover)
-    else:
-        abort(404)
+    book = Book.query.get_or_404(id)
+    cover = process_covers([book])[0][1]
+    return render_template("main/book_details.html", title="Szczegóły ksiązki", book=book, form=form, cover=cover)

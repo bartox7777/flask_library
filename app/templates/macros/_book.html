@@ -14,7 +14,7 @@
             </div>
             {% if show_description %}
                 <div class="text-muted m-3">
-                    {{ book.description }}
+                    {{ book.description|truncate }}
                 </div>
             {% endif %}
         </div>
