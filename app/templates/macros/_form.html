@@ -6,7 +6,7 @@
                 <span class="text-muted fs-6">{{ error }}</span><br>
             {% endfor %}
         {% else %}
-        {{ field(class="form-control", placeholder="name@example.pl", **kwargs)|safe }}
+            {{ field(class="form-control", placeholder="name@example.pl", **kwargs)|safe }}
         {% endif %}
         {{ field.label }}
     </div>
