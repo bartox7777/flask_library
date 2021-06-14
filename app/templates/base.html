@@ -1,3 +1,6 @@
+{% from "macros/_form.html" import render_floating_input %}
+{% from "macros/_form.html" import render_submit %}
+
 <!-- inspired by www.srodawlkp-mbp.sowwwa.pl -->
 <!doctype html>
 <html lang="pl">
@@ -28,6 +31,12 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link" href="{{ url_for('main.index') }}">Strona główna</a>
+                </div>
+                <div class="navbar-nav">
+                    <a class="nav-link" href="{{ url_for('main.search') }}">Wyszukiwanie zaawansowane</a>
+                </div>
                 {% if current_user.is_authenticated %}
                 <div class="navbar-nav ms-auto">
                     <a class="nav-link" href="{{ url_for('auth.logout') }}">Wyloguj</a>
@@ -48,7 +57,19 @@
         </div>
         {% endfor %}
     </div>
+    {% if not dont_show_search_bar %}
+        <div class="container mt-5 p-5 bg-light border">
+            <h2 class="text-center mb-3">Szukaj w księgozbiorze</h2>
+            <div class="border-top"></div>
+            <form method="post" class="mt-4">
+                {{ form.csrf_token }}
+                {{ render_floating_input(form.phrase) }}
+                {{ render_submit(form.submit, class="btn btn-secondary float-end") }}
+            </form>
+        </div>
+    {% endif %}
     {% block content %}{% endblock content %}
+    <div class="m-5"></div>
     <!-- TODO: class footer don't work properly -->
     <!-- fixed-bottom isn't the best idea -->
     <!-- temporary solution -->

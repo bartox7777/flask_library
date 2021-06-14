@@ -1,0 +1,22 @@
+{% macro render_book(book, cover, show_description=False) %}
+<div class="d-flex shadow-sm m-3 p-3">
+    {{ cover|safe }}
+        <div class="ms-3">
+            <div class="mb-3">
+                <a href="{{ url_for('main.book_details', id=book.id) }}" class="link-dark"><span class="fw-bold font-monospace m-3 fs-3">{{ book.title }}</span></a>
+                <span class="fs-3 font-monospace"> | {{ book.author.full_name }}</span>
+            </div>
+            <div class="m-3">
+                Wydawnictwo: {{ book.publisher}}<br>
+                Rok wydania: {{ book.year }}<br>
+                Liczba stron: {{ book.pages }}<br>
+                Gatunek: {{ book.category }}
+            </div>
+            {% if show_description %}
+                <div class="text-muted m-3">
+                    {{ book.description }}
+                </div>
+            {% endif %}
+        </div>
+</div>
+{% endmacro %}

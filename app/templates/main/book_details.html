@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% from "macros/_book.html" import render_book %}
+
+{% block content %}
+    <div class="container bg-light mt-3 p-5 border">
+        {{ render_book(book, cover, show_description=True) }}
+    </div>
+{% endblock content %}

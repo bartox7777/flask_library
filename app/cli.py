@@ -83,7 +83,7 @@ def insert_test_data(additional_users, books):
         book = Book(
             isbn=fake.isbn10(),
             title=fake.text(max_nb_chars=20)[:-1],
-            description=fake.text(max_nb_chars=200),
+            description=fake.text(max_nb_chars=500),
             category=choice(categories),
             author_id=author_with_books.id,
             number_of_copies=fake.random_digit_not_null(),

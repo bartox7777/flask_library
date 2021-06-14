@@ -1,3 +1,4 @@
+from flask import abort
 from flask import url_for
 from flask import request
 from flask import redirect
@@ -65,3 +66,18 @@ def search():
     else:
         found_books = Book.query.all()
     return render_template("main/search.html", title="Panel wyszukiwania", form=form, found_books=process_covers(found_books))
+
+@main.route("/book-details/<int:id>", methods=("GET", "POST"))
+def book_details(id):
+    form = SearchForm()
+    if form.validate_on_submit():
+        phrase = form.phrase.data
+        if phrase:
+            return redirect(url_for("main.search", phrase=phrase))
+
+    book = Book.query.get(id)
+    if book:
+        cover = process_covers([book])[0][1]
+        return render_template("main/book_details.html", title="Szczegóły ksiązki", book=book, form=form, cover=cover)
+    else:
+        abort(404)

@@ -40,7 +40,7 @@ def login():
         flash("Nieprawidłowe dane logowania.", "warning")
 
 
-    return render_template("auth/login.html", title="Login", form=form, dont_show_footer=True)
+    return render_template("auth/login.html", title="Login", form=form, dont_show_footer=True, dont_show_search_bar=True)
 
 @auth.route("/logout", methods=("GET", "POST"))
 @login_required
