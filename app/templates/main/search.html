@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "macros/_book.html" import render_book %}
+{% from "macros/_pagination.html" import render_pagination %}
 
 {% block content %}
 
@@ -11,7 +12,8 @@
                 {% for book, cover in found_books %}
                     {{ render_book(book, cover) }}
                 {% endfor %}
-                {% else %}
+                {{ render_pagination(pagination, "main.search") }}
+            {% else %}
                 <h2 class="text-muted">Nic nie znaleziono...</h2>
             {% endif %}
         </div>

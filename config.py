@@ -8,6 +8,7 @@ class Config:
     TESTING = False
     SECRET_KEY = os.environ.get("SECRET_KEY")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    BOOKS_PER_PAGE = 5
 
     # @staticmethod
     # def init_app(app):

@@ -1,7 +1,7 @@
-from flask import abort
 from flask import url_for
 from flask import request
 from flask import redirect
+from flask import current_app
 from flask import render_template
 
 import io
@@ -26,7 +26,13 @@ def process_covers(books, width=200, height=300, class_="img-thumbnail p-1 m-2")
         cover_file_like = io.BytesIO()
         cover.save(cover_file_like, cover.format)
         cover_file_like.seek(0)
-        img_tag = f'<img class={class_} style="width: {width}px; height: {height}px" src="data:image/{cover.format.lower()};base64,{b64encode(cover_file_like.read()).decode()}">'
+        img_tag = f'''
+            <img
+                class={class_}
+                style="width: {width}px; height: {height}px"
+                src="data:image/{cover.format.lower()};
+                base64,{b64encode(cover_file_like.read()).decode()}">
+        '''
         processed_covers.append(img_tag)
 
     return list(zip(books, processed_covers))
@@ -41,11 +47,17 @@ def index():
 
     newest_books = Book.query.order_by(Book.add_date.desc()).limit(5).all()
 
+    return render_template(
+        "main/index.html",
+        title="Strona główna",
+        form=form,
+        newest_books=process_covers(newest_books)
+    )
 
-    return render_template("main/index.html", title="Strona główna", form=form, newest_books=process_covers(newest_books))
 
-@main.route("/search", methods=("GET", "POST"))
-def search():
+@main.route("/search/", methods=("GET", "POST"), defaults={"page": 1})
+@main.route("/search/<int:page>", methods=("GET", "POST"))
+def search(page):
     form = SearchForm()
     if form.validate_on_submit():
         phrase = form.phrase.data
@@ -54,18 +66,27 @@ def search():
         form.phrase.data = phrase
 
     # TODO: it is better to use some search engine
-    # TODO: need to use pagination
     if phrase:
-        found_books = Book.query.join(Author, Author.id==Book.author_id).filter(
+        found_books = Book.query \
+            .paginate(page, current_app.config["BOOKS_PER_PAGE"]) \
+            .join(Author, Author.id==Book.author_id) \
+            .filter(
             or_(
                 Book.title.like(f"%{phrase}%"),
                 Book.description.like(f"%{phrase}%"),
                 Author.full_name.like(f"%{phrase}%")
             )
-        ).all()
+        )
     else:
-        found_books = Book.query.all()
-    return render_template("main/search.html", title="Panel wyszukiwania", form=form, found_books=process_covers(found_books))
+        found_books = Book.query.paginate(page, current_app.config["BOOKS_PER_PAGE"])
+    return render_template(
+        "main/search.html",
+        title="Panel wyszukiwania",
+        form=form,
+        found_books=process_covers(found_books.items),
+        pagination=found_books,
+        page=page
+    )
 
 @main.route("/book-details/<int:id>", methods=("GET", "POST"))
 def book_details(id):
@@ -77,4 +98,10 @@ def book_details(id):
 
     book = Book.query.get_or_404(id)
     cover = process_covers([book])[0][1]
-    return render_template("main/book_details.html", title="Szczegóły ksiązki", book=book, form=form, cover=cover)
+    return render_template(
+        "main/book_details.html",
+        title="Szczegóły ksiązki",
+        book=book,
+        form=form,
+        cover=cover
+    )
