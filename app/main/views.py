@@ -61,6 +61,7 @@ def search(page):
     form = SearchForm()
     if form.validate_on_submit():
         phrase = form.phrase.data
+        page = 1
     else:
         phrase = request.args.get("phrase", "")
         form.phrase.data = phrase
@@ -68,7 +69,6 @@ def search(page):
     # TODO: it is better to use some search engine
     if phrase:
         found_books = Book.query \
-            .paginate(page, current_app.config["BOOKS_PER_PAGE"]) \
             .join(Author, Author.id==Book.author_id) \
             .filter(
             or_(
@@ -76,7 +76,7 @@ def search(page):
                 Book.description.like(f"%{phrase}%"),
                 Author.full_name.like(f"%{phrase}%")
             )
-        )
+        ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
     else:
         found_books = Book.query.paginate(page, current_app.config["BOOKS_PER_PAGE"])
     return render_template(

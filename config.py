@@ -36,6 +36,7 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URI") or \
         "sqlite://"
     WTF_CSRF_ENABLED = False
+    BOOKS_PER_PAGE = 5
 
 
 config = dict(

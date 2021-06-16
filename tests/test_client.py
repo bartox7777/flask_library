@@ -1,10 +1,11 @@
 import unittest
 
+from flask import current_app
 from flask_login import current_user
-
 
 from app import create_app
 from app import login_manager
+from app.models import Book
 
 class ClientTestCase(unittest.TestCase):
     pass
@@ -14,16 +15,49 @@ class ClientTestCase(unittest.TestCase):
         self.app_context.push()
         cli = self.app.test_cli_runner()
         cli.invoke(args=["init-db"])
-        cli.invoke(args=["insert-test-data"])
+        # two pagination pages
+        cli.invoke(args=["insert-test-data", "--books", str(current_app.config["BOOKS_PER_PAGE"] * 2)])
         self.client = self.app.test_client(use_cookies=True)
 
     def tearDown(self):
         self.app_context.pop()
 
-    def test_search_page(self):
+    def test_index_page(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(b"Zaloguj" in response.get_data())
+        self.assertTrue("Ostatnio dodane książki" in response.get_data(as_text=True))
+        last_added_books = Book.query.order_by(Book.add_date.desc()).limit(5).all()
+        for book in last_added_books:
+            self.assertTrue(book.title in response.get_data(as_text=True))
+
+        response = self.client.post("/", data=dict(
+            phrase = "help"
+        ))
+        self.assertEqual(response.status_code, 302)
+
+    def test_search_page(self):
+        with self.client as client:
+            response = client.get("/search", follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("Znalezione książki" in response.get_data(as_text=True))
+
+            response = client.get("/search/2", follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+
+            response = client.get("/search/3", follow_redirects=True)
+            self.assertEqual(response.status_code, 404)
+
+            response = client.get("/search", follow_redirects=True)
+            first_book = Book.query.first()
+            self.assertTrue(first_book.title in response.get_data(as_text=True))
+
+            response = client.post("/search/", data=dict(
+                phrase="//@@!!thiscannotbesearched??..\\\\"
+            ),
+            follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(b"Nic nie znaleziono..." in response.get_data())
 
     def test_auth_pages(self):
         with self.client as client:
