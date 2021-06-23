@@ -12,6 +12,10 @@
     </div>
 {% endmacro %}
 
+{% macro render_select(field) %}
+    {{ field(class="form-select", **kwargs) }}
+{% endmacro %}
+
 {% macro render_submit(field) %}
     {{ field(class="btn btn-secondary", **kwargs)|safe }}
 {% endmacro %}

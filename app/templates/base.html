@@ -1,4 +1,5 @@
 {% from "macros/_form.html" import render_floating_input %}
+{% from "macros/_form.html" import render_select %}
 {% from "macros/_form.html" import render_submit %}
 
 <!-- inspired by www.srodawlkp-mbp.sowwwa.pl -->
@@ -64,7 +65,14 @@
             <form method="post" class="mt-4">
                 {{ form.csrf_token }}
                 {{ render_floating_input(form.phrase) }}
-                {{ render_submit(form.submit, class="btn btn-secondary float-end") }}
+                <div class="d-flex justify-content-between">
+                    <div>
+                        {{ render_select(form.search_by, class="form-select") }}
+                    </div>
+                    <div>
+                        {{ render_submit(form.submit, class="btn btn-secondary") }}
+                    </div>
+                </div>
             </form>
         </div>
     {% endif %}
