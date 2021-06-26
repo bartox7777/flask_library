@@ -1,3 +1,4 @@
+from app.main.views import search
 import unittest
 
 from flask import current_app
@@ -8,7 +9,6 @@ from app import login_manager
 from app.models import Book
 
 class ClientTestCase(unittest.TestCase):
-    pass
     def setUp(self):
         self.app = create_app("testing")
         self.app_context = self.app.app_context()
@@ -53,7 +53,7 @@ class ClientTestCase(unittest.TestCase):
             self.assertTrue(first_book.title in response.get_data(as_text=True))
 
             response = client.post("/search/", data=dict(
-                phrase="//@@!!thiscannotbesearched??..\\\\"
+                phrase="//@@!!thiscannotbesearched??..\\\\",
             ),
             follow_redirects=True)
             self.assertEqual(response.status_code, 200)

@@ -59,9 +59,21 @@ def index():
 @main.route("/search/<int:page>", methods=("GET", "POST"))
 def search(page):
     form = SearchForm()
+    phrase = title = category = author = ""
+
     if form.validate_on_submit():
-        phrase = form.phrase.data
         page = 1
+
+        search_by = form.search_by.data
+        if search_by == "title":
+            title = form.phrase.data
+        elif search_by == "category":
+            category = form.phrase.data
+        elif search_by == "author":
+            author = form.phrase.data
+        else:
+            phrase = form.phrase.data
+
     else:
         phrase = request.args.get("phrase", "")
         form.phrase.data = phrase
@@ -77,6 +89,22 @@ def search(page):
                 Author.full_name.like(f"%{phrase}%")
             )
         ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
+    elif title:
+        found_books = Book.query \
+            .filter(
+                Book.title.like(f"%{title}%"),
+            ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
+    elif category:
+        found_books = Book.query \
+            .filter(
+                Book.category.like(f"%{category}%"),
+            ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
+    elif author:
+            found_books = Book.query \
+            .join(Author, Author.id==Book.author_id) \
+            .filter(
+            Author.full_name.like(f"%{author}%")
+        ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
     else:
         found_books = Book.query.paginate(page, current_app.config["BOOKS_PER_PAGE"])
     return render_template(
@@ -85,7 +113,8 @@ def search(page):
         form=form,
         found_books=process_covers(found_books.items),
         pagination=found_books,
-        page=page
+        page=page,
+        advanced_search=True
     )
 
 @main.route("/book-details/<int:id>", methods=("GET", "POST"))
