@@ -29,6 +29,7 @@ class DevelopmentConfig(Config):
         "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
     # SQLALCHEMY_ECHO = True
     SQLALCHEMY_RECORD_QUERIES = True
+    BOOKS_PER_PAGE = 2
 
 
 class TestingConfig(Config):
@@ -36,7 +37,6 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URI") or \
         "sqlite://"
     WTF_CSRF_ENABLED = False
-    BOOKS_PER_PAGE = 5
 
 
 config = dict(

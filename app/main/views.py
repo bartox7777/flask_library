@@ -40,10 +40,6 @@ def process_covers(books, width=200, height=300, class_="img-thumbnail p-1 m-2")
 @main.route("/", methods=("GET", "POST"))
 def index():
     form = SearchForm()
-    if form.validate_on_submit():
-        phrase = form.phrase.data
-        if phrase:
-            return redirect(url_for("main.search", phrase=phrase))
 
     newest_books = Book.query.order_by(Book.add_date.desc()).limit(5).all()
 
@@ -55,56 +51,47 @@ def index():
     )
 
 
-@main.route("/search/", methods=("GET", "POST"), defaults={"page": 1})
-@main.route("/search/<int:page>", methods=("GET", "POST"))
-def search(page):
+@main.route("/search/", methods=("GET", "POST"))
+def search():
     form = SearchForm()
-    phrase = title = category = author = ""
 
-    if form.validate_on_submit():
-        page = 1
-
-        search_by = form.search_by.data
-        if search_by == "title":
-            title = form.phrase.data
-        elif search_by == "category":
-            category = form.phrase.data
-        elif search_by == "author":
-            author = form.phrase.data
-        else:
-            phrase = form.phrase.data
-
-    else:
-        phrase = request.args.get("phrase", "")
-        form.phrase.data = phrase
+    page = request.args.get("page", 1, type=int)
+    search_by = form.search_by.data = request.args.get("search_by", "phrase")
+    phrase = form.phrase.data = request.args.get("phrase", "")
 
     # TODO: it is better to use some search engine
-    if phrase:
+    if search_by == "phrase":
         found_books = Book.query \
             .join(Author, Author.id==Book.author_id) \
             .filter(
             or_(
                 Book.title.like(f"%{phrase}%"),
                 Book.description.like(f"%{phrase}%"),
+                Book.publisher.like(f"%{phrase}%"),
                 Author.full_name.like(f"%{phrase}%")
             )
         ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
-    elif title:
+    elif search_by == "title":
         found_books = Book.query \
             .filter(
-                Book.title.like(f"%{title}%"),
+                Book.title.like(f"%{phrase}%"),
             ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
-    elif category:
+    elif search_by == "category":
         found_books = Book.query \
             .filter(
-                Book.category.like(f"%{category}%"),
+                Book.category.like(f"%{phrase}%"),
             ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
-    elif author:
+    elif search_by == "author":
             found_books = Book.query \
             .join(Author, Author.id==Book.author_id) \
             .filter(
-            Author.full_name.like(f"%{author}%")
+            Author.full_name.like(f"%{phrase}%")
         ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
+    elif search_by == "publisher":
+            found_books = Book.query \
+            .filter(
+                Book.publisher.like(f"%{phrase}%"),
+            ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
     else:
         found_books = Book.query.paginate(page, current_app.config["BOOKS_PER_PAGE"])
     return render_template(
@@ -120,10 +107,6 @@ def search(page):
 @main.route("/book-details/<int:id>", methods=("GET", "POST"))
 def book_details(id):
     form = SearchForm()
-    if form.validate_on_submit():
-        phrase = form.phrase.data
-        if phrase:
-            return redirect(url_for("main.search", phrase=phrase))
 
     book = Book.query.get_or_404(id)
     cover = process_covers([book])[0][1]

@@ -5,13 +5,13 @@
         <div class="mb-3">
             <a href="{{ url_for('main.book_details', id=book.id) }}" class="link-dark"><span
                     class="fw-bold font-monospace m-3 fs-3">{{ book.title }}</span></a>
-            <span class="fs-3 font-monospace"> | {{ book.author.full_name }}</span>
+            <span class="fs-3 font-monospace"> | <a href="{{ url_for('main.search', search_by='author', phrase=book.author.full_name) }}" class="link-dark">{{ book.author.full_name }}</a></span>
         </div>
         <div class="m-3">
-            Wydawnictwo: {{ book.publisher}}<br>
+            Wydawnictwo: <a href="{{ url_for('main.search', search_by='publisher', phrase=book.category) }}" class="link-dark">{{ book.publisher }}</a><br>
             Rok wydania: {{ book.year }}<br>
             Liczba stron: {{ book.pages }}<br>
-            Gatunek: {{ book.category }}
+            Gatunek: <a href="{{ url_for('main.search', search_by='category', phrase=book.category) }}" class="link-dark">{{ book.category }}</a>
         </div>
         {% if show_description %}
         <div class="text-muted m-3">

@@ -1,3 +1,4 @@
+from sqlalchemy.orm import query
 from app.main.views import search
 import unittest
 
@@ -31,10 +32,10 @@ class ClientTestCase(unittest.TestCase):
         for book in last_added_books:
             self.assertTrue(book.title in response.get_data(as_text=True))
 
-        response = self.client.post("/", data=dict(
+        response = self.client.get("/", query_string=dict(
             phrase = "help"
         ))
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
     def test_search_page(self):
         with self.client as client:
@@ -42,26 +43,27 @@ class ClientTestCase(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue("Znalezione książki" in response.get_data(as_text=True))
 
-            response = client.get("/search/2", follow_redirects=True)
+            response = client.get("/search", data=dict(page=2), follow_redirects=True)
             self.assertEqual(response.status_code, 200)
 
-            response = client.get("/search/3", follow_redirects=True)
+            response = client.get("/search", query_string=dict(page=3), follow_redirects=True)
             self.assertEqual(response.status_code, 404)
 
             response = client.get("/search", follow_redirects=True)
             first_book = Book.query.first()
             self.assertTrue(first_book.title in response.get_data(as_text=True))
 
-            response = client.post("/search/", data=dict(
-                phrase="//@@!!thiscannotbesearched??..\\\\",
-            ),
-            follow_redirects=True)
+            response = client.get("/search", query_string=dict(
+                    phrase="//@@!!thiscannotbesearched??..\\\\",
+                ),
+                follow_redirects=True
+            )
             self.assertEqual(response.status_code, 200)
             self.assertTrue(b"Nic nie znaleziono..." in response.get_data())
 
     def test_auth_pages(self):
         with self.client as client:
-            response = client.get("logout", follow_redirects=True)
+            response = client.get("/logout", follow_redirects=True)
             self.assertEqual(response.status_code, 200)
             self.assertTrue(login_manager.login_message in response.get_data(as_text=True))
 
@@ -75,7 +77,7 @@ class ClientTestCase(unittest.TestCase):
             self.assertTrue(full_name in response.get_data(as_text=True))
             self.assertTrue(b"Wyloguj" in response.get_data())
 
-            response = client.get("logout", follow_redirects=True)
+            response = client.get("/logout", follow_redirects=True)
             self.assertEqual(response.status_code, 200)
             self.assertTrue("Pomyślnie wylogowano." in response.get_data(as_text=True))
             self.assertTrue(b"Zaloguj" in response.get_data())
