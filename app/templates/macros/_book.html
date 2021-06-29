@@ -1,11 +1,21 @@
 {% macro render_book(book, cover, show_description=False) %}
-<div class="d-flex shadow-sm m-3 p-3">
-    {{ cover|safe }}
-    <div class="ms-3">
-        <div class="mb-3">
-            <a href="{{ url_for('main.book_details', id=book.id) }}" class="link-dark"><span
-                    class="fw-bold font-monospace m-3 fs-3">{{ book.title }}</span></a>
-            <span class="fs-3 font-monospace"> | <a href="{{ url_for('main.search', search_by='author', phrase=book.author.full_name) }}" class="link-dark">{{ book.author.full_name }}</a></span>
+<div class="d-flex shadow-sm flex-column flex-md-row m-3 p-3">
+    <div class="flex-shrink-0 ms-3 mb-2">
+        {{ cover|safe }}
+    </div>
+    <div>
+        <div>
+            <span class="fw-bold font-monospace m-3 fs-3">
+                <a href="{{ url_for('main.book_details', id=book.id) }}" class="link-dark">
+                    {{ book.title }}
+                </a>
+            </span>
+            <br>
+            <span class="fs-5 font-monospace m-3">
+                <a href="{{ url_for('main.search', search_by='author', phrase=book.author.full_name) }}" class="link-dark text-muted">
+                    {{ book.author.full_name }}
+                </a>
+            </span>
         </div>
         <div class="m-3">
             Wydawnictwo: <a href="{{ url_for('main.search', search_by='publisher', phrase=book.publisher) }}" class="link-dark">{{ book.publisher }}</a><br>
