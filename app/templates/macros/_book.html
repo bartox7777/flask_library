@@ -8,7 +8,7 @@
             <span class="fs-3 font-monospace"> | <a href="{{ url_for('main.search', search_by='author', phrase=book.author.full_name) }}" class="link-dark">{{ book.author.full_name }}</a></span>
         </div>
         <div class="m-3">
-            Wydawnictwo: <a href="{{ url_for('main.search', search_by='publisher', phrase=book.category) }}" class="link-dark">{{ book.publisher }}</a><br>
+            Wydawnictwo: <a href="{{ url_for('main.search', search_by='publisher', phrase=book.publisher) }}" class="link-dark">{{ book.publisher }}</a><br>
             Rok wydania: {{ book.year }}<br>
             Liczba stron: {{ book.pages }}<br>
             Gatunek: <a href="{{ url_for('main.search', search_by='category', phrase=book.category) }}" class="link-dark">{{ book.category }}</a>
