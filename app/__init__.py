@@ -2,6 +2,7 @@ from flask import Flask
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_login import AnonymousUserMixin
 from flask_babel import Babel
 from flask_migrate import Migrate
 
@@ -13,9 +14,17 @@ login_manager = LoginManager()
 babel = Babel()
 migrate = Migrate()
 
+# is it good solution?
+class AnonymousUser(AnonymousUserMixin):
+    role = dict(
+        name="anonymous"
+    )
+    # TODO: role = Role.query.filter_by(name="anonymous").first()
+
 login_manager.login_view = "auth.login"
 login_manager.login_message = "Zaloguj się, aby mieć dostęp do tej strony."
 login_manager.login_message_category = "warning"
+login_manager.anonymous_user = AnonymousUser
 
 def create_app(config_name="production"):
     app = Flask(__name__)
@@ -54,7 +63,9 @@ def create_app(config_name="production"):
 
     from .auth import auth
     from .main import main
+    from .moderate import moderate
     app.register_blueprint(auth)
     app.register_blueprint(main)
+    app.register_blueprint(moderate)
 
     return app

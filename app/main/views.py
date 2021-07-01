@@ -1,6 +1,4 @@
-from flask import url_for
 from flask import request
-from flask import redirect
 from flask import current_app
 from flask import render_template
 
@@ -39,14 +37,12 @@ def process_covers(books, width=200, height=300, class_="img-thumbnail p-1 m-2")
 
 @main.route("/", methods=("GET", "POST"))
 def index():
-    form = SearchForm()
-
     newest_books = Book.query.order_by(Book.add_date.desc()).limit(5).all()
 
     return render_template(
         "main/index.html",
         title="Strona główna",
-        form=form,
+        form=SearchForm(),
         newest_books=process_covers(newest_books)
     )
 
@@ -106,14 +102,12 @@ def search():
 
 @main.route("/book-details/<int:id>", methods=("GET", "POST"))
 def book_details(id):
-    form = SearchForm()
-
     book = Book.query.get_or_404(id)
     cover = process_covers([book])[0][1]
     return render_template(
         "main/book_details.html",
         title="Szczegóły ksiązki",
         book=book,
-        form=form,
+        form=SearchForm(),
         cover=cover
     )

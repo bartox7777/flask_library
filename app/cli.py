@@ -45,7 +45,7 @@ def insert_test_data(additional_users, books):
 
     db.session.add_all([test_admin, test_moderator, test_user, test_user_inactive])
 
-    fake = Faker()
+    fake = Faker("pl-PL")
 
     # PERSONAL DATA
     for _ in range(additional_users):

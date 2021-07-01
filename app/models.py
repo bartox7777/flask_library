@@ -33,7 +33,6 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
 
-
 class PersonalData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
@@ -59,6 +58,7 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = dict(
+            anonymous=[],
             user=[Permission.USER],
             moderator=[Permission.USER, Permission.MODERATOR],
             admin=[Permission.USER, Permission.MODERATOR, Permission.ADMIN]

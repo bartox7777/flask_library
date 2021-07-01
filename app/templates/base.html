@@ -39,13 +39,30 @@
                     <a class="nav-link" href="{{ url_for('main.search') }}">Wyszukiwanie zaawansowane</a>
                 </div>
                 {% if current_user.is_authenticated %}
-                <div class="navbar-nav ms-auto">
-                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Wyloguj</a>
-                </div>
+                    {% if current_user.role.name in ("moderator", "admin") %}
+                        <div class="dropdown navbar-nav">
+                            <a class="dropdown-toggle nav-link" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                Moderacja
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('moderate.add_book') }}">Dodaj książkę</a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">
+                            Wyloguj
+                            <span class="small text-muted">
+                                [{{ current_user.personal_data[0].name }} {{ current_user.personal_data[0].surname }}]
+                            </span>
+                        </a>
+                    </div>
                 {% else %}
-                <div class="navbar-nav ms-auto">
-                    <a class="nav-link" href="{{ url_for('auth.login') }}">Zaloguj</a>
-                </div>
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">Zaloguj</a>
+                    </div>
                 {% endif %}
             </div>
         </div>

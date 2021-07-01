@@ -1,4 +1,4 @@
-{% macro render_book(book, cover, show_description=False) %}
+{% macro render_book(book, cover, current_user, extend=False) %}
 <div class="d-flex shadow-sm flex-column flex-md-row m-3 p-3">
     <div class="flex-shrink-0 ms-3 mb-2">
         {{ cover|safe }}
@@ -23,11 +23,31 @@
             Liczba stron: {{ book.pages }}<br>
             Gatunek: <a href="{{ url_for('main.search', search_by='category', phrase=book.category) }}" class="link-dark">{{ book.category }}</a>
         </div>
-        {% if show_description %}
+        {% if extend %}
         <div class="text-muted m-3">
             {{ book.description|truncate }}
         </div>
         {% endif %}
     </div>
+    {% if extend %}
+    <div class="text-end">
+        <button class="btn btn-success m-1">
+            <abbr title="Wypożycz">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square-fill" viewBox="0 0 16 16">
+                    <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0z"/>
+                </svg>
+            </abbr>
+        </button>
+        {% if current_user.role.name in ("moderator", "admin") %}
+        <button class="btn btn-warning m-1">
+            <abbr title="Edytuj">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
+                    <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z"/>
+                </svg>
+            </abbr>
+        </button>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
     {% endmacro %}
