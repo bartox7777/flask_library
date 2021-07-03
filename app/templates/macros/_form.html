@@ -16,6 +16,10 @@
     {{ field(class="form-select", **kwargs) }}
 {% endmacro %}
 
+{% macro render_input_file(field) %}
+    {{ field(class="form-control", type="file", **kwargs) }}
+{% endmacro %}
+
 {% macro render_submit(field) %}
     {{ field(class="btn btn-secondary", **kwargs)|safe }}
 {% endmacro %}

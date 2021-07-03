@@ -1,7 +1,24 @@
 {% extends "base.html" %}
+{% from "macros/_form.html" import render_floating_input %}
+{% from "macros/_form.html" import render_select %}
+{% from "macros/_form.html" import render_input_file %}
+{% from "macros/_form.html" import render_submit %}
 
 {% block content %}
     <div class="container bg-light mt-3 p-5 border">
-        Dodaj książkę
+        <h1 class="text-center">Dodaj książkę do księgozbioru</h1>
+        <div class="d-flex justify-content-center my-5">
+            <form>
+                {{ form.csrf_token }}
+                {{ render_floating_input(form.isbn) }}
+                {{ render_floating_input(form.title) }}
+                {{ render_floating_input(form.description) }}
+                {{ render_floating_input(form.number_of_copies, type="number", min="0") }}
+                {{ render_input_file(form.cover, class="form-control form-control-lg my-3") }}
+                {{ render_floating_input(form.pages, type="number", min="0") }}
+                {{ render_floating_input(form.year, type="number", min="0") }}
+                {{ render_submit(form.submit) }}
+            </form>
+        </div>
     </div>
 {% endblock content %}
