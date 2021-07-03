@@ -12,13 +12,6 @@ from ..models import Book
 
 
 class AddBookForm(FlaskForm):
-    # def __init__(self, session):
-    #     super().__init__()
-    #     self.session = session
-
-    # def fetch_categories(self):
-    #     return [(category[0], category[0]) for category in self.session.query(Book.category).distinct().all()]
-
     isbn = StringField("ISBN", validators=[DataRequired()])
     title = StringField("Tytuł", validators=[DataRequired()])
     category = SelectField()
