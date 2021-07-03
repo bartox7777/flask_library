@@ -12,6 +12,7 @@
                 {{ form.csrf_token }}
                 {{ render_floating_input(form.isbn) }}
                 {{ render_floating_input(form.title) }}
+                {{ render_select(form.category) }}
                 {{ render_floating_input(form.description) }}
                 {{ render_floating_input(form.number_of_copies, type="number", min="0") }}
                 {{ render_input_file(form.cover, class="form-control form-control-lg my-3") }}
