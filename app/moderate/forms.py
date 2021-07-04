@@ -1,3 +1,5 @@
+from flask import request
+
 from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms import SubmitField
@@ -7,20 +9,28 @@ from wtforms import TextAreaField
 from wtforms import SelectField
 from wtforms.validators import DataRequired
 from wtforms.validators import NumberRange
-
-from ..models import Book
+from wtforms.validators import ValidationError
 
 
 class AddBookForm(FlaskForm):
     isbn = StringField("ISBN", validators=[DataRequired()])
     title = StringField("Tytuł", validators=[DataRequired()])
-    category = SelectField()
+    category = SelectField(validate_choice=False)  # True makes error - incorrect choice
     # category_add = StringField("Dodaj kategorię")
     description = TextAreaField("Opis")
-    # author = None
+    author = SelectField(validate_choice=False)  # True makes error - incorrect choice
     number_of_copies = IntegerField("Liczba kopii", validators=[DataRequired(), NumberRange(min=0)])
     cover = FileField("Okładka")
-    # publisher = None
+    publisher = SelectField(validate_choice=False)  # True makes error - incorrect choice
     pages = IntegerField("Stron", validators=[DataRequired(), NumberRange(min=0)])
-    year = IntegerField("Rok wydania", validators=[DataRequired()])
+    year = IntegerField("Rok wydania", validators=[DataRequired()], default=2021)
     submit = SubmitField("Dodaj książkę")
+
+    def validate_cover(form, field):
+        if request.files["cover"]:
+            image = request.files["cover"]
+
+            extension = image.filename.split(".")
+            if extension[-1].lower() not in ("jpg", "jpeg", "png"):
+                raise ValidationError("Nieprawidłowy format pliku. Dozwolone rozszerzenia: .JPG, .JPEG, .PNG")
+            # TODO: file size validation

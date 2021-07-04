@@ -4,21 +4,26 @@
 {% from "macros/_form.html" import render_input_file %}
 {% from "macros/_form.html" import render_submit %}
 
+
 {% block content %}
     <div class="container bg-light mt-3 p-5 border">
         <h1 class="text-center">Dodaj książkę do księgozbioru</h1>
         <div class="d-flex justify-content-center my-5">
-            <form>
+            <form method="POST" enctype="multipart/form-data" action="/add-book" style="min-width: 40%;">
                 {{ form.csrf_token }}
                 {{ render_floating_input(form.isbn) }}
                 {{ render_floating_input(form.title) }}
                 {{ render_select(form.category) }}
                 {{ render_floating_input(form.description) }}
+                {{ render_select(form.author) }}
                 {{ render_floating_input(form.number_of_copies, type="number", min="0") }}
-                {{ render_input_file(form.cover, class="form-control form-control-lg my-3") }}
+                {{ render_input_file(form.cover, accept=".jpg,.jpeg,.png") }}
+                {{ render_select(form.publisher) }}
                 {{ render_floating_input(form.pages, type="number", min="0") }}
                 {{ render_floating_input(form.year, type="number", min="0") }}
-                {{ render_submit(form.submit) }}
+                <div class="text-center">
+                    {{ render_submit(form.submit) }}
+                </div>
             </form>
         </div>
     </div>

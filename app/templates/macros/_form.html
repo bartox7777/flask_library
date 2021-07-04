@@ -13,11 +13,26 @@
 {% endmacro %}
 
 {% macro render_select(field) %}
-    {{ field(class="form-select", **kwargs) }}
+    {% if field.errors %}
+        {{ field(class="form-select is-invalid", **kwargs) }}
+        {% for error in field.errors %}
+            <span class="text-muted fs-6">{{ error }}</span>
+            <div class="my-3"></div>
+        {% endfor %}
+    {% else %}
+        {{ field(class="form-select my-3", **kwargs) }}
+    {% endif %}
 {% endmacro %}
 
 {% macro render_input_file(field) %}
-    {{ field(class="form-control", type="file", **kwargs) }}
+    {% if field.errors %}
+        {{ field(class="form-control is-invalid", type="file", **kwargs) }}
+        {% for error in field.errors %}
+            <span class="text-muted fs-6">{{ error }}</span>
+        {% endfor %}
+    {% else %}
+        {{ field(class="form-control", type="file", **kwargs) }}
+    {% endif %}
 {% endmacro %}
 
 {% macro render_submit(field) %}

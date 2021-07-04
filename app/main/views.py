@@ -49,7 +49,7 @@ def index():
 
 @main.route("/search/", methods=("GET", "POST"))
 def search():
-    form = SearchForm()
+    form = SearchForm(request.form)
 
     page = request.args.get("page", 1, type=int)
     search_by = form.search_by.data = request.args.get("search_by", "phrase")
