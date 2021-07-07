@@ -9,7 +9,7 @@
             <div class="m-2">
                 <a href="{{ url_for('main.book_details', id=book.id) }}" class="link-dark">
                     {{ cover|safe }} <br>
-                    {{ book.title }}
+                    <div style="max-width: 200px;">{{ book.title }}</div>
                 </a>
             </div>
         {% endfor %}

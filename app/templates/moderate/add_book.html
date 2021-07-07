@@ -12,15 +12,15 @@
             <form method="POST" enctype="multipart/form-data" action="/add-book" style="min-width: 40%;">
                 {{ form.csrf_token }}
                 {{ render_floating_input(form.isbn) }}
-                {{ render_floating_input(form.title) }}
+                {{ render_floating_input(form.title, required=False) }}
                 {{ render_select(form.category) }}
                 {{ render_floating_input(form.description) }}
                 {{ render_select(form.author) }}
-                {{ render_floating_input(form.number_of_copies, type="number", min="0") }}
+                {{ render_floating_input(form.number_of_copies, type="number", min="0", required=False) }}
                 {{ render_input_file(form.cover, accept=".jpg,.jpeg,.png") }}
                 {{ render_select(form.publisher) }}
-                {{ render_floating_input(form.pages, type="number", min="0") }}
-                {{ render_floating_input(form.year, type="number", min="0") }}
+                {{ render_floating_input(form.pages, type="number", min="0", required=False) }}
+                {{ render_floating_input(form.year, type="number", min="0", required=False) }}
                 <div class="text-center">
                     {{ render_submit(form.submit) }}
                 </div>
