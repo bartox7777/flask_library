@@ -32,6 +32,11 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def can(self, permission):
+        if self.role.permissions & permission == permission:
+            return True
+        return False
+
 
 class PersonalData(db.Model):
     id = db.Column(db.Integer, primary_key=True)

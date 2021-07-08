@@ -22,10 +22,10 @@ class AddBookForm(FlaskForm):
     # category_add = StringField("Dodaj kategorię")
     description = TextAreaField("Opis")
     author = SelectField(validate_choice=False)  # True makes error - incorrect choice
-    number_of_copies = IntegerField("Liczba kopii", validators=[NumberRange(min=0), DataRequired()])
+    number_of_copies = IntegerField("Liczba kopii", validators=[NumberRange(min=0)])
     cover = FileField("Okładka")
     publisher = SelectField(validate_choice=False)  # True makes error - incorrect choice
-    pages = IntegerField("Stron", validators=[DataRequired()])
+    pages = IntegerField("Stron", validators=[NumberRange(min=0)])
     year = StringField("Rok wydania", validators=[DataRequired()])
     submit = SubmitField("Dodaj książkę")
 

@@ -8,15 +8,19 @@ from isbnlib import desc
 from isbnlib import meta
 from isbnlib import is_isbn10
 from isbnlib import is_isbn13
+from flask_login import login_required
 
 from .forms import AddBookForm
 from . import moderate
 from .. import db
 from ..models import Book
 from ..models import Author
+from ..auth.decorators import moderator_required
 
 
 @moderate.route("/add-book", methods=("GET", "POST"))
+@moderator_required
+# @login_required
 def add_book():
     form = AddBookForm(request.form)
     if form.validate_on_submit():
