@@ -19,9 +19,10 @@ class AddBookForm(FlaskForm):
     isbn = StringField("ISBN", validators=[DataRequired()])
     title = StringField("Tytuł", validators=[DataRequired()])
     category = SelectField(validate_choice=False)  # True makes error - incorrect choice
-    # category_add = StringField("Dodaj kategorię")
+    add_category = StringField("Nowa kategoria")
     description = TextAreaField("Opis")
     author = SelectField(validate_choice=False)  # True makes error - incorrect choice
+    add_author = StringField("Nowy autor")
     number_of_copies = IntegerField("Liczba kopii", validators=[NumberRange(min=0)])
     cover = FileField("Okładka")
     publisher = SelectField(validate_choice=False)  # True makes error - incorrect choice
