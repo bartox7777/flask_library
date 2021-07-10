@@ -26,6 +26,7 @@ class AddBookForm(FlaskForm):
     number_of_copies = IntegerField("Liczba kopii", validators=[NumberRange(min=0)])
     cover = FileField("Okładka")
     publisher = SelectField(validate_choice=False)  # True makes error - incorrect choice
+    add_publisher = StringField("Nowy wydawca")
     pages = IntegerField("Stron", validators=[NumberRange(min=0)])
     year = StringField("Rok wydania", validators=[DataRequired()])
     submit = SubmitField("Dodaj książkę")

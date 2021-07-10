@@ -24,6 +24,7 @@ def add_book():
     form = AddBookForm(request.form)
     if form.validate_on_submit():
         category = form.add_category.data if form.add_category.data else form.category.data
+        publisher = form.add_publisher.data if form.add_publisher.data else form.publisher.data
 
         author_id = form.author.data
         if form.add_author.data:
@@ -40,7 +41,7 @@ def add_book():
             author_id=author_id,
             number_of_copies=form.number_of_copies.data,
             cover=request.files["cover"].stream.read(),
-            publisher=form.publisher.data,
+            publisher=publisher,
             pages=form.pages.data,
             year=form.year.data
         )
