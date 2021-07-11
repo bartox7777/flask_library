@@ -20,17 +20,25 @@ def process_covers(books, width=200, height=300, class_="img-thumbnail p-1 m-2")
         # cover_file_like = io.BytesIO(book.cover)
 
         # doing this to get image format
-        cover = Image.open(io.BytesIO(book.cover))
-        cover_file_like = io.BytesIO()
-        cover.save(cover_file_like, cover.format)
-        cover_file_like.seek(0)
-        img_tag = f'''
-            <img
-                class={class_}
-                style="width: {width}px; height: {height}px"
-                src="data:image/{cover.format.lower()};
-                base64,{b64encode(cover_file_like.read()).decode()}">
-        '''
+        try:
+            cover = Image.open(io.BytesIO(book.cover))
+            cover_file_like = io.BytesIO()
+            cover.save(cover_file_like, cover.format)
+            cover_file_like.seek(0)
+            img_tag = f'''
+                <img
+                    class={class_}
+                    style="width: {width}px; height: {height}px"
+                    src="data:image/{cover.format.lower()};
+                    base64,{b64encode(cover_file_like.read()).decode()}">
+            '''
+        except:
+            img_tag = f'''
+                <img
+                    class={class_}
+                    style="width: {width}px; height: {height}px"
+                    src="">
+            '''
         processed_covers.append(img_tag)
 
     return list(zip(books, processed_covers))
@@ -49,7 +57,7 @@ def index():
 
 @main.route("/search/", methods=("GET", "POST"))
 def search():
-    form = SearchForm()
+    form = SearchForm(request.form)
 
     page = request.args.get("page", 1, type=int)
     search_by = form.search_by.data = request.args.get("search_by", "phrase")

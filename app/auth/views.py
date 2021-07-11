@@ -20,7 +20,7 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
 
-    form = LoginForm()
+    form = LoginForm(request.form)
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data

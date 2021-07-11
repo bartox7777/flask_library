@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% from "macros/_form.html" import render_floating_input %}
+{% from "macros/_form.html" import render_select %}
+{% from "macros/_form.html" import render_input_file %}
+{% from "macros/_form.html" import render_submit %}
+
+
+{% block content %}
+    <div class="container bg-light mt-3 p-5 border">
+        <h1 class="text-center">{{ heading }}</h1>
+        <div class="d-flex justify-content-center my-5">
+            <form method="POST" enctype="multipart/form-data" action="#" style="min-width: 40%;">
+                {{ form.csrf_token }}
+                {{ render_floating_input(form.isbn) }}
+                {{ render_floating_input(form.title, required=False) }}
+                {{ render_select(form.category) }}
+                {{ render_floating_input(form.add_category, hidden=True) }}
+                <div class="text-end mb-2" style="margin-top: -15px;">
+                    <span class="btn" id="add_category_btn">{{ form.add_category.label }}</span>
+                </div>
+                {{ render_floating_input(form.description) }}
+                {{ render_select(form.author) }}
+                {{ render_floating_input(form.add_author, hidden=True) }}
+                <div class="text-end mb-2" style="margin-top: -15px;">
+                    <span class="btn" id="add_author_btn">{{ form.add_author.label }}</span>
+                </div>
+                {{ render_floating_input(form.number_of_copies, type="number", min="0", required=False) }}
+                {{ render_input_file(form.cover, accept=".jpg,.jpeg,.png") }}
+                <div style="height: 10px"></div>
+                {{ render_select(form.publisher) }}
+                {{ render_floating_input(form.add_publisher, hidden=True) }}
+                <div class="text-end mb-2" style="margin-top: -15px;">
+                    <span class="btn" id="add_publisher_btn">{{ form.add_publisher.label }}</span>
+                </div>
+                {{ render_floating_input(form.pages, type="number", min="0", required=False) }}
+                {{ render_floating_input(form.year, type="number", min="0", required=False) }}
+                <div class="text-center">
+                    {{ render_submit(form.submit, value=button_value) }}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function switch_select_input(select, input, input_label, button, input_inner, select_inner){
+            select.hidden = !select.hidden;
+            input_label.hidden = input.hidden = !input.hidden;
+
+            if (select.hidden){
+                button.innerHTML = input_inner;
+                input.required = true;
+            } else{
+                input.value = "";
+                input.required = false;
+                button.innerHTML = select_inner;
+            }
+        }
+
+
+        categories = document.querySelector("select[name='category']");
+        add_category = document.querySelector("input[name='add_category']");
+        add_category_label = document.querySelector("label[for='add_category']");
+        add_category_label.hidden = add_category.hidden;
+        add_category_btn = document.querySelector("#add_category_btn");
+
+        add_category_btn.addEventListener("click", function(){
+            switch_select_input(
+                categories,
+                add_category,
+                add_category_label,
+                add_category_btn,
+                "Wybierz kategorię",
+                "Nowa kategoria"
+            )
+        });
+
+
+        authors = document.querySelector("select[name='author']");
+        add_author = document.querySelector("input[name='add_author']");
+        add_author_label = document.querySelector("label[for='add_author']");
+        add_author_label.hidden = add_author.hidden;
+        add_author_btn = document.querySelector("#add_author_btn");
+
+        add_author_btn.addEventListener("click", function(){
+            switch_select_input(
+                authors,
+                add_author,
+                add_author_label,
+                add_author_btn,
+                "Wybierz autora",
+                "Nowy autor"
+            )
+        });
+
+
+        publishers = document.querySelector("select[name='publisher']");
+        add_publisher = document.querySelector("input[name='add_publisher']");
+        add_publisher_label = document.querySelector("label[for='add_publisher']");
+        add_publisher_label.hidden = add_publisher.hidden;
+        add_publisher_btn = document.querySelector("#add_publisher_btn");
+
+        add_publisher_btn.addEventListener("click", function(){
+            switch_select_input(
+                publishers,
+                add_publisher,
+                add_publisher_label,
+                add_publisher_btn,
+                "Wybierz wydawcę",
+                "Nowy wydawca"
+            )
+        });
+
+    </script>
+
+{% endblock content %}
