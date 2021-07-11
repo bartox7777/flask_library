@@ -15,7 +15,7 @@ from isbnlib import is_isbn13
 from isbnlib import clean
 
 
-class AddBookForm(FlaskForm):
+class BookForm(FlaskForm):
     isbn = StringField("ISBN", validators=[DataRequired()])
     title = StringField("Tytuł", validators=[DataRequired()])
     category = SelectField(validate_choice=False)  # True makes error - incorrect choice
@@ -29,7 +29,7 @@ class AddBookForm(FlaskForm):
     add_publisher = StringField("Nowy wydawca")
     pages = IntegerField("Stron", validators=[NumberRange(min=0)])
     year = StringField("Rok wydania", validators=[DataRequired()])
-    submit = SubmitField("Dodaj książkę")
+    submit = SubmitField()
 
     def validate_cover(form, field):
         if request.files["cover"]:

@@ -7,9 +7,9 @@
 
 {% block content %}
     <div class="container bg-light mt-3 p-5 border">
-        <h1 class="text-center">Dodaj książkę do księgozbioru</h1>
+        <h1 class="text-center">{{ heading }}</h1>
         <div class="d-flex justify-content-center my-5">
-            <form method="POST" enctype="multipart/form-data" action="/add-book" style="min-width: 40%;">
+            <form method="POST" enctype="multipart/form-data" action="#" style="min-width: 40%;">
                 {{ form.csrf_token }}
                 {{ render_floating_input(form.isbn) }}
                 {{ render_floating_input(form.title, required=False) }}
@@ -35,7 +35,7 @@
                 {{ render_floating_input(form.pages, type="number", min="0", required=False) }}
                 {{ render_floating_input(form.year, type="number", min="0", required=False) }}
                 <div class="text-center">
-                    {{ render_submit(form.submit) }}
+                    {{ render_submit(form.submit, value=button_value) }}
                 </div>
             </form>
         </div>
