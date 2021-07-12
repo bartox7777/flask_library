@@ -60,20 +60,6 @@ class ClientTestCase(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue(b"Nic nie znaleziono..." in response.get_data())
 
-    def test_book_details(self):
-        random_book = random.choice(Book.query.all())
-        response = self.client.get(f"/book-details/{random_book.id}")
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse('title="Wypożycz"' in response.get_data(as_text=True))
-        self.assertFalse('title="Edytuj"' in response.get_data(as_text=True))
-
-        self.assertTrue(random_book.title in response.get_data(as_text=True))
-        self.assertTrue(random_book.author.full_name in response.get_data(as_text=True))
-        self.assertTrue(str(random_book.year) in response.get_data(as_text=True))
-        self.assertTrue(str(random_book.pages) in response.get_data(as_text=True))
-        self.assertTrue(random_book.category in response.get_data(as_text=True))
-        self.assertTrue(random_book.description[:20] in response.get_data(as_text=True))
-
     def test_auth_pages(self):
         with self.client as client:
             response = client.get("/logout", follow_redirects=True)
@@ -101,3 +87,53 @@ class ClientTestCase(unittest.TestCase):
             follow_redirects=True)
             self.assertEqual(response.status_code, 200)
             self.assertTrue("Nieprawidłowe dane logowania." in response.get_data(as_text=True))
+
+    def test_book_details(self):
+        random_book = random.choice(Book.query.all())
+        response = self.client.get(f"/book-details/{random_book.id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse('title="Wypożycz"' in response.get_data(as_text=True))
+        self.assertFalse('title="Edytuj"' in response.get_data(as_text=True))
+
+        self.assertTrue(random_book.title in response.get_data(as_text=True))
+        self.assertTrue(random_book.author.full_name in response.get_data(as_text=True))
+        self.assertTrue(str(random_book.year) in response.get_data(as_text=True))
+        self.assertTrue(str(random_book.pages) in response.get_data(as_text=True))
+        self.assertTrue(random_book.category in response.get_data(as_text=True))
+        self.assertTrue(random_book.description[:20] in response.get_data(as_text=True))
+
+        with self.client as client:
+            client.post("/login", data=dict(
+                email="test@test.user",
+                password="test"),
+                follow_redirects=True)
+
+            random_book = random.choice(Book.query.all())
+            response = self.client.get(f"/book-details/{random_book.id}")
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue('title="Wypożycz"' in response.get_data(as_text=True))
+            self.assertFalse('title="Edytuj"' in response.get_data(as_text=True))
+
+            response = client.get("/logout", follow_redirects=True)
+            client.post("/login", data=dict(
+                email="test@test.moderator",
+                password="test"),
+                follow_redirects=True)
+
+            random_book = random.choice(Book.query.all())
+            response = self.client.get(f"/book-details/{random_book.id}")
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue('title="Wypożycz"' in response.get_data(as_text=True))
+            self.assertTrue('title="Edytuj"' in response.get_data(as_text=True))
+
+            response = client.get("/logout", follow_redirects=True)
+            client.post("/login", data=dict(
+                email="test@test.admin",
+                password="test"),
+                follow_redirects=True)
+
+            random_book = random.choice(Book.query.all())
+            response = self.client.get(f"/book-details/{random_book.id}")
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue('title="Wypożycz"' in response.get_data(as_text=True))
+            self.assertTrue('title="Edytuj"' in response.get_data(as_text=True))
