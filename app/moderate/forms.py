@@ -32,7 +32,7 @@ class BookForm(FlaskForm):
     submit = SubmitField()
 
     def validate_cover(form, field):
-        if request.files["cover"]:
+        if request.files.get("cover"):
             image = request.files["cover"]
 
             extension = image.filename.split(".")

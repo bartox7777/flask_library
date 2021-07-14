@@ -41,7 +41,7 @@ def add_book():
             description=form.description.data,
             author_id=author_id,
             number_of_copies=form.number_of_copies.data,
-            cover=request.files["cover"].stream.read(),
+            cover=request.files["cover"].stream.read() if request.files.get("cover") else None,
             publisher=publisher,
             pages=form.pages.data,
             year=form.year.data
