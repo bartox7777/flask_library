@@ -1,6 +1,6 @@
-import os
 import unittest
 from faker import Faker
+from random import choice
 
 from flask import current_app
 
@@ -77,3 +77,64 @@ class ModerateTestCase(unittest.TestCase):
             ))
             self.assertEqual(response.status_code, 302)
             self.assertGreater(len(Book.query.all()), books_len)
+
+    def test_edit_book(self):
+        random_book = choice(Book.query.all())
+        author_name = random_book.author.full_name
+
+        response = self.client.get(f"/edit-book/{random_book.id}")
+        self.assertEqual(response.status_code, 302)
+
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.user",
+                password="test"),
+                follow_redirects=True)
+            response = client.get(f"/edit-book/{random_book.id}", follow_redirects=True)
+            self.assertEqual(response.status_code, 403)
+            client.get("/logout", follow_redirects=True)
+
+            response = client.post("/login", data=dict(
+                email="test@test.moderator",
+                password="test"),
+                follow_redirects=True)
+            response = client.get(f"/edit-book/{random_book.id}", follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(random_book.isbn in response.get_data(as_text=True))
+            self.assertTrue(random_book.title in response.get_data(as_text=True))
+            self.assertTrue(random_book.category in response.get_data(as_text=True))
+            self.assertTrue(random_book.description in response.get_data(as_text=True))
+            self.assertTrue(random_book.author.full_name in response.get_data(as_text=True))
+            self.assertTrue(str(random_book.number_of_copies) in response.get_data(as_text=True))
+            self.assertTrue(random_book.publisher in response.get_data(as_text=True))
+            self.assertTrue(str(random_book.pages) in response.get_data(as_text=True))
+            self.assertTrue(str(random_book.year) in response.get_data(as_text=True))
+
+            response = client.post(f"/edit-book/{random_book.id}", follow_redirects=True, data=dict(
+                title="@testpurpose@"
+            ))
+            self.assertTrue("@testpurpose@" in response.get_data(as_text=True))
+            client.get("/logout", follow_redirects=True)
+
+            response = client.post("/login", data=dict(
+                email="test@test.admin",
+                password="test"),
+                follow_redirects=True)
+            response = client.get(f"/edit-book/{random_book.id}", follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(random_book.isbn in response.get_data(as_text=True))
+            self.assertTrue(random_book.title in response.get_data(as_text=True))
+            self.assertTrue(random_book.category in response.get_data(as_text=True))
+            self.assertTrue(random_book.description in response.get_data(as_text=True))
+            self.assertTrue(author_name in response.get_data(as_text=True))
+            self.assertTrue(str(random_book.number_of_copies) in response.get_data(as_text=True))
+            self.assertTrue(random_book.publisher in response.get_data(as_text=True))
+            self.assertTrue(str(random_book.pages) in response.get_data(as_text=True))
+            self.assertTrue(str(random_book.year) in response.get_data(as_text=True))
+
+            # BUG
+            response = client.post(f"/edit-book/{random_book.id}", follow_redirects=True, data=dict(
+                title="!testpurpose!"
+            ))
+            self.assertTrue("!testpurpose!" in response.get_data(as_text=True))
+            client.get("/logout", follow_redirects=True)

@@ -93,7 +93,7 @@ def edit_book(id):
         book.publisher = form.publisher.data
         book.pages = form.pages.data
         book.year = form.year.data
-        cover = request.files["cover"].stream.read()
+        cover = request.files["cover"].stream.read() if request.files.get("cover") else ""
         if len(cover) > 0:
             book.cover = cover
         db.session.commit()
