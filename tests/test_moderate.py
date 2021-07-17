@@ -111,7 +111,8 @@ class ModerateTestCase(unittest.TestCase):
             self.assertTrue(str(random_book.year) in response.get_data(as_text=True))
 
             response = client.post(f"/edit-book/{random_book.id}", follow_redirects=True, data=dict(
-                title="@testpurpose@"
+                title="@testpurpose@",
+                author=random_book.author_id
             ))
             self.assertTrue("@testpurpose@" in response.get_data(as_text=True))
             client.get("/logout", follow_redirects=True)
@@ -132,9 +133,9 @@ class ModerateTestCase(unittest.TestCase):
             self.assertTrue(str(random_book.pages) in response.get_data(as_text=True))
             self.assertTrue(str(random_book.year) in response.get_data(as_text=True))
 
-            # BUG
             response = client.post(f"/edit-book/{random_book.id}", follow_redirects=True, data=dict(
-                title="!testpurpose!"
+                title="!testpurpose!",
+                author=random_book.author_id
             ))
             self.assertTrue("!testpurpose!" in response.get_data(as_text=True))
             client.get("/logout", follow_redirects=True)
