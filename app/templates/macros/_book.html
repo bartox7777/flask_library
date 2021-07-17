@@ -31,7 +31,7 @@
     </div>
     {% if extend %}
     <div class="text-end">
-        {% if current_user.role.name in ("user", "moderator", "admin") %}
+        {% if current_user.role.name in ("moderator", "admin") %}
             <a href="#" class="btn btn-success m-1">
                 <abbr title="Wypożycz">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square-fill" viewBox="0 0 16 16">
