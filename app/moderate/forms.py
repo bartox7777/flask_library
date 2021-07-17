@@ -1,3 +1,5 @@
+import os
+
 from flask import request
 
 from flask_wtf import FlaskForm
@@ -35,13 +37,14 @@ class BookForm(FlaskForm):
         if request.files.get("cover"):
             image = request.files["cover"]
 
-            extension = image.filename.split(".")
+            extension = os.path.splitext(image.filename)
             if extension[-1].lower() not in ("jpg", "jpeg", "png"):
                 raise ValidationError("Nieprawidłowy format pliku. Dozwolone rozszerzenia: .JPG, .JPEG, .PNG")
 
-            #TODO: call image.stream.read() makes this method in views return b''
-            # if len(image.stream.read()) > 16 * 1000 * 1000: # bytes
-            #     raise ValidationError("Plik nie może być większy niż 16 MB.")
+            image_read = image.stream.read()
+            image.stream.seek(0)
+            if len(image_read) > 16 * 1000 * 1000: # bytes
+                raise ValidationError("Plik nie może być większy niż 16 MB.")
 
     def validate_isbn(form, field):
         isbn = clean(form.isbn.data)

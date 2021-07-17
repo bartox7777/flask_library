@@ -112,7 +112,7 @@ class ClientTestCase(unittest.TestCase):
             random_book = random.choice(Book.query.all())
             response = self.client.get(f"/book-details/{random_book.id}")
             self.assertEqual(response.status_code, 200)
-            self.assertTrue('title="Wypożycz"' in response.get_data(as_text=True))
+            self.assertFalse('title="Wypożycz"' in response.get_data(as_text=True))
             self.assertFalse('title="Edytuj"' in response.get_data(as_text=True))
 
             response = client.get("/logout", follow_redirects=True)
