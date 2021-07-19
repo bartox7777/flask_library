@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from flask import request
 
@@ -25,12 +26,12 @@ class BookForm(FlaskForm):
     description = TextAreaField("Opis")
     author = SelectField(validate_choice=False)  # True makes error - incorrect choice
     add_author = StringField("Nowy autor")
-    number_of_copies = IntegerField("Liczba kopii", validators=[NumberRange(min=0)])
+    number_of_copies = IntegerField("Liczba kopii", validators=[NumberRange(min=0, max=10000)])
     cover = FileField("Okładka")
     publisher = SelectField(validate_choice=False)  # True makes error - incorrect choice
     add_publisher = StringField("Nowy wydawca")
-    pages = IntegerField("Stron", validators=[NumberRange(min=0)])
-    year = StringField("Rok wydania", validators=[DataRequired()])
+    pages = IntegerField("Stron", validators=[NumberRange(min=0, max=10000)])
+    year = IntegerField("Rok wydania", validators=[DataRequired(), NumberRange(max=datetime.now().year)])
     submit = SubmitField()
 
     def validate_cover(form, field):
@@ -50,3 +51,9 @@ class BookForm(FlaskForm):
         isbn = clean(form.isbn.data)
         if not (is_isbn10(isbn) or is_isbn13(isbn)):
             raise ValidationError("Nieprawidłowy numer ISBN.")
+
+
+class BorrowBook(FlaskForm):
+    user_id = StringField("ID użytkownika")
+    users = SelectField(validate_choice=False)
+    submit = SubmitField()

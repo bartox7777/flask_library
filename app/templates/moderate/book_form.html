@@ -41,22 +41,8 @@
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='switch_select_input.js') }}"></script>
     <script>
-        function switch_select_input(select, input, input_label, button, input_inner, select_inner){
-            select.hidden = !select.hidden;
-            input_label.hidden = input.hidden = !input.hidden;
-
-            if (select.hidden){
-                button.innerHTML = input_inner;
-                input.required = true;
-            } else{
-                input.value = "";
-                input.required = false;
-                button.innerHTML = select_inner;
-            }
-        }
-
-
         categories = document.querySelector("select[name='category']");
         add_category = document.querySelector("input[name='add_category']");
         add_category_label = document.querySelector("label[for='add_category']");

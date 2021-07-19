@@ -11,6 +11,7 @@ from . import main
 from .forms import SearchForm
 from ..models import Book
 from ..models import Author
+from ..models import Borrow
 
 
 def process_covers(books, width=200, height=300, class_="img-thumbnail p-1 m-2"):
@@ -112,10 +113,12 @@ def search():
 def book_details(id):
     book = Book.query.get_or_404(id)
     cover = process_covers([book])[0][1]
+    available_copies = book.number_of_copies - Borrow.query.filter_by(book_id=book.id, return_date=None).count()
     return render_template(
         "main/book_details.html",
         title="Szczegóły ksiązki",
         book=book,
         form=SearchForm(),
-        cover=cover
+        cover=cover,
+        available_copies=available_copies
     )

@@ -1,4 +1,4 @@
-{% macro render_book(book, cover, current_user, extend=False) %}
+{% macro render_book(book, cover, current_user, available_copies, extend=False) %}
 <div class="d-flex shadow-sm flex-column flex-md-row m-3 p-3">
     <div class="flex-shrink-0 ms-3 mb-2">
         {{ cover|safe }}
@@ -22,6 +22,10 @@
             Rok wydania: {{ book.year }}<br>
             Liczba stron: {{ book.pages }}<br>
             Gatunek: <a href="{{ url_for('main.search', search_by='category', phrase=book.category) }}" class="link-dark">{{ book.category }}</a>
+            {% if extend %}
+                <br>
+                Dostępnych sztuk: <span class={% if available_copies > 0 %}"text-success"{% else %}"text-danger"{% endif %}> {{ available_copies }}  / {{ book.number_of_copies }} </span>
+            {% endif %}
         </div>
         {% if extend %}
         <div class="text-muted m-3">
@@ -31,8 +35,8 @@
     </div>
     {% if extend %}
     <div class="text-end">
-        {% if current_user.role.name in ("moderator", "admin") %}
-            <a href="#" class="btn btn-success m-1">
+        {% if current_user.role.name in ("moderator", "admin")%}
+            <a href="{{ url_for('moderate.borrow_book', id=book.id) }}" class="btn btn-success m-1 {% if available_copies <= 0 %}disabled{% endif %}">
                 <abbr title="Wypożycz">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square-fill" viewBox="0 0 16 16">
                         <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0z"/>

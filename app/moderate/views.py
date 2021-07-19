@@ -11,11 +11,14 @@ from isbnlib import is_isbn10
 from isbnlib import is_isbn13
 
 from .forms import BookForm
+from .forms import BorrowBook
 from . import moderate
 from .. import db
 
 from ..models import Book
+from ..models import User
 from ..models import Author
+from ..models import Borrow
 from ..auth.decorators import moderator_required
 
 
@@ -116,4 +119,34 @@ def edit_book(id):
         form=form,
         heading="Edytuj książkę z księgozbioru",
         button_value="Edytuj książkę"
+    )
+
+@moderate.route("/borrow-book/<int:id>", methods=("GET", "POST"))
+@moderator_required
+def borrow_book(id):
+    form = BorrowBook()
+    form.users.choices = [(user.id, f"{user.personal_data[0].name} {user.personal_data[0].surname} ({ user.id })") for user in User.query.all()]
+    book = Book.query.get_or_404(id)
+
+    if form.validate_on_submit():
+        user_id = form.users.data
+        if form.user_id.data:
+            user_id = form.user_id.data
+        borrow = Borrow(
+            user_id=user_id,
+            book_id=book.id,
+        )
+        db.session.add(borrow)
+        db.session.commit()
+        flash("Pomyślnie wypożyczono książkę.", category="success")
+        return redirect(url_for("main.book_details", id=book.id))
+
+    return render_template(
+        "moderate/borrow_book.html",
+        title="Wypożycz książkę",
+        dont_show_search_bar=True,
+        form=form,
+        heading="Wypożycz książkę z księgozbioru",
+        button_value="Wypożycz książkę",
+        book=book
     )

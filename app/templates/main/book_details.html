@@ -3,6 +3,6 @@
 
 {% block content %}
     <div class="container bg-light mt-3 p-5 border">
-        {{ render_book(book, cover, current_user, extend=True) }}
+        {{ render_book(book, cover, current_user, available_copies, extend=True) }}
     </div>
 {% endblock content %}
