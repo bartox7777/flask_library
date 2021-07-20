@@ -113,7 +113,9 @@ def search():
 def book_details(id):
     book = Book.query.get_or_404(id)
     cover = process_covers([book])[0][1]
-    available_copies = book.number_of_copies - Borrow.query.filter_by(book_id=book.id, return_date=None).count()
+    borrows = [borrow for borrow in book.borrows if borrow.return_date is None]
+    available_copies = book.number_of_copies - len(borrows)
+
     return render_template(
         "main/book_details.html",
         title="Szczegóły ksiązki",

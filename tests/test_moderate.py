@@ -6,6 +6,7 @@ from flask import current_app
 
 from app import create_app
 from app.models import Author
+from app.models import User
 from app.models import Book
 
 class ModerateTestCase(unittest.TestCase):
@@ -139,3 +140,44 @@ class ModerateTestCase(unittest.TestCase):
             ))
             self.assertTrue("!testpurpose!" in response.get_data(as_text=True))
             client.get("/logout", follow_redirects=True)
+
+    def test_borrow_book(self):
+        random_book = choice(Book.query.all())
+        response = self.client.get(f"/borrow-book/{random_book.id}")
+        self.assertEqual(response.status_code, 302)
+
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.user",
+                password="test"),
+                follow_redirects=True)
+            response = self.client.get(f"/borrow-book/{random_book.id}")
+            self.assertEqual(response.status_code, 403)
+            client.get("/logout", follow_redirects=True)
+
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.moderator",
+                password="test"),
+                follow_redirects=True)
+            response = client.get(f"/borrow-book/{random_book.id}")
+            self.assertEqual(response.status_code, 200)
+
+            user_id = User.query.filter_by(email="test@test.user").first().id
+            for _ in range(random_book.number_of_copies):
+                response = client.post(f"/borrow-book/{random_book.id}", follow_redirects=True, data=dict(
+                    user_id=user_id
+                ))
+            borrows = [borrow for borrow in random_book.borrows if borrow.return_date is None and borrow.user_id==user_id]
+            self.assertEqual(len(borrows), random_book.number_of_copies)
+            client.get("/logout", follow_redirects=True)
+
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.admin",
+                password="test"),
+                follow_redirects=True)
+            response = client.get(f"/borrow-book/{random_book.id}", follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("Brak dostępnych kopii do wypożyczenia" in response.get_data(as_text=True))
+            self.assertTrue(f"0 / {random_book.number_of_copies}" in response.get_data(as_text=True))

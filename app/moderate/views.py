@@ -127,6 +127,10 @@ def borrow_book(id):
     form = BorrowBook()
     form.users.choices = [(user.id, f"{user.personal_data[0].name} {user.personal_data[0].surname} ({ user.id })") for user in User.query.all()]
     book = Book.query.get_or_404(id)
+    borrows = [borrow for borrow in book.borrows if borrow.return_date is None]
+    if len(borrows) >= book.number_of_copies:
+        flash("Brak dostępnych kopii do wypożyczenia.", category="danger")
+        return redirect(url_for("main.book_details", id=book.id))
 
     if form.validate_on_submit():
         user_id = form.users.data

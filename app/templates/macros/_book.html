@@ -24,7 +24,7 @@
             Gatunek: <a href="{{ url_for('main.search', search_by='category', phrase=book.category) }}" class="link-dark">{{ book.category }}</a>
             {% if extend %}
                 <br>
-                Dostępnych sztuk: <span class={% if available_copies > 0 %}"text-success"{% else %}"text-danger"{% endif %}> {{ available_copies }}  / {{ book.number_of_copies }} </span>
+                Dostępnych sztuk: <span class="{% if available_copies > 0 %}text-success{% else %}text-danger{% endif %}"> {{ available_copies }} / {{ book.number_of_copies }} </span>
             {% endif %}
         </div>
         {% if extend %}
