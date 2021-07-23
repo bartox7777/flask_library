@@ -15,7 +15,7 @@ from .forms import BorrowBook
 from . import moderate
 from .. import db
 
-from ..models import Book
+from ..models import Book, PersonalData
 from ..models import User
 from ..models import Author
 from ..models import Borrow
@@ -153,4 +153,20 @@ def borrow_book(id):
         heading="Wypożycz książkę z księgozbioru",
         button_value="Wypożycz książkę",
         book=book
+    )
+
+@moderate.route("/list-users", methods=("GET", "POST"))
+@moderator_required
+def list_users():
+    users = User.query \
+            .join(PersonalData) \
+            .order_by(PersonalData.surname) \
+            .all()
+    print(users)
+    return render_template(
+        "moderate/list_users.html",
+        title="Lista użytkowników",
+        dont_show_search_bar=True,
+        heading="Lista wszystkich użytkowników",
+        users=users
     )
