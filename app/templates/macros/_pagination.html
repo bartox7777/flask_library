@@ -4,11 +4,7 @@
     {% if page %}
       {% if page != pagination.page %}
         <li class="page-item">
-          {% if request.args.get("search_by") and request.args.get("phrase") %}
-          <a class="page-link" href="{{ url_for(endpoint, page=page, search_by=request.args.get("search_by"), phrase=request.args.get("phrase")) }}">{{ page }}</a>
-          {% else %}
             <a class="page-link" href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
-          {% endif %}
         </li>
       {% else %}
         <li class="page-item active">

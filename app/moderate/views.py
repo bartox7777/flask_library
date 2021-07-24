@@ -3,15 +3,18 @@ from flask import request
 from flask import redirect
 from flask import url_for
 from flask import flash
+from flask import current_app
 
 from isbnlib import clean
 from isbnlib import desc
 from isbnlib import meta
 from isbnlib import is_isbn10
 from isbnlib import is_isbn13
+from sqlalchemy import or_
 
 from .forms import BookForm
-from .forms import BorrowBook
+from .forms import SearchUserForm
+from .forms import BorrowBookForm
 from . import moderate
 from .. import db
 
@@ -124,7 +127,7 @@ def edit_book(id):
 @moderate.route("/borrow-book/<int:id>", methods=("GET", "POST"))
 @moderator_required
 def borrow_book(id):
-    form = BorrowBook()
+    form = BorrowBookForm()
     form.users.choices = [(user.id, f"{user.personal_data[0].name} {user.personal_data[0].surname} ({ user.id })") for user in User.query.all()]
     book = Book.query.get_or_404(id)
     borrows = [borrow for borrow in book.borrows if borrow.return_date is None]
@@ -158,15 +161,57 @@ def borrow_book(id):
 @moderate.route("/list-users", methods=("GET", "POST"))
 @moderator_required
 def list_users():
-    users = User.query \
-            .join(PersonalData) \
-            .order_by(PersonalData.surname) \
-            .all()
-    print(users)
+    form = SearchUserForm(request.form)
+
+    page = request.args.get("page", 1, type=int)
+    phrase = form.phrase.data = request.args.get("phrase", "")
+
+    if phrase:
+        if " " in phrase:
+            # name and surname
+            phrase = phrase.title()
+            splitted_phrase = phrase.split()
+            users_paginate = User.query \
+                .join(PersonalData) \
+                .filter(
+                    PersonalData.name.in_(splitted_phrase),
+                    PersonalData.surname.in_(splitted_phrase)
+                ) \
+                .order_by(PersonalData.surname) \
+                .paginate(page, current_app.config["USERS_PER_PAGE"])
+        else:
+            # id, only name, only surname
+            try:
+                int(phrase)
+                users_paginate = User.query \
+                    .join(PersonalData) \
+                    .filter_by(id=phrase) \
+                    .order_by(PersonalData.surname) \
+                    .paginate(page, current_app.config["USERS_PER_PAGE"])
+            except:
+                users_paginate = User.query \
+                    .join(PersonalData) \
+                    .filter(
+                        or_(
+                            PersonalData.name.ilike(f"%{phrase}%"),
+                            PersonalData.surname.ilike(f"%{phrase}%")
+                        )
+                    ) \
+                    .order_by(PersonalData.surname) \
+                    .paginate(page, current_app.config["USERS_PER_PAGE"])
+
+    else:
+        users_paginate = User.query \
+                .join(PersonalData) \
+                .order_by(PersonalData.surname) \
+                .paginate(page, current_app.config["USERS_PER_PAGE"])
     return render_template(
         "moderate/list_users.html",
         title="Lista użytkowników",
         dont_show_search_bar=True,
         heading="Lista wszystkich użytkowników",
-        users=users
+        users=users_paginate.items,
+        page=page,
+        pagination=users_paginate,
+        form = form
     )

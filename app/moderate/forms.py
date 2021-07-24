@@ -53,7 +53,12 @@ class BookForm(FlaskForm):
             raise ValidationError("Nieprawidłowy numer ISBN.")
 
 
-class BorrowBook(FlaskForm):
+class BorrowBookForm(FlaskForm):
     user_id = StringField("ID użytkownika")
     users = SelectField(validate_choice=False)
+    submit = SubmitField()
+
+
+class SearchUserForm(FlaskForm):
+    phrase = StringField("Dane użytkownika")
     submit = SubmitField()
