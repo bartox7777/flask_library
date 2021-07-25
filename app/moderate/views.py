@@ -199,7 +199,6 @@ def list_users():
                     ) \
                     .order_by(PersonalData.surname) \
                     .paginate(page, current_app.config["USERS_PER_PAGE"])
-
     else:
         users_paginate = User.query \
                 .join(PersonalData) \
@@ -213,5 +212,23 @@ def list_users():
         users=users_paginate.items,
         page=page,
         pagination=users_paginate,
-        form = form
+        form=form
+    )
+
+@moderate.route("/list-borrows-books/<int:user_id>", methods=("GET", "POST"))
+@moderator_required
+def list_borrows_books(user_id):
+    user = User.query.get_or_404(user_id)
+    page = request.args.get("page", 1, type=int)
+
+    borrowed_books = Borrow.query.filter_by(user_id=user_id).order_by(Borrow.return_date).paginate(page, current_app.config["BOOKS_PER_PAGE"])
+
+    return render_template(
+        "moderate/list_borrows_books.html",
+        title="Wypożyczenia",
+        dont_show_search_bar=True,
+        heading=f"Wypożyczenia użytkownika {user.personal_data[0].name} {user.personal_data[0].surname}",
+        borrowed_books=borrowed_books.items,
+        page=page,
+        pagination=borrowed_books
     )
