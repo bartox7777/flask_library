@@ -5,43 +5,48 @@
 {% block content %}
 <div class="container bg-light mt-3 p-5 border">
     <h1 class="text-center">{{ heading }}</h1>
+    <hr>
     <div class="d-flex justify-content-center my-5">
         <ul class="list-group" style="min-width: 40%;">
-            {% for borrow in borrowed_books %}
-                <li class="list-group-item">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            {{ borrow.book.title }} <br>
-                            <span class="text-muted">{{ borrow.book.isbn }}&nbsp;</span> <br>
-                            Wypożyczono: {{ borrow.date.strftime("%d-%m-%Y") }} <br>
-                            <!-- TODO: chceck if delay -->
-                            {% if not borrow.return_date %}
-                                <span class="text-danger">Nie oddano</span>
-                            {% else %}
-                            <span class="text-success">Oddano ({{ borrow.return_date.strftime("%d-%M-%Y") }})</span>
-                            {% endif %}
+            {% if borrowed_books %}
+                {% for borrow in borrowed_books %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="{{ url_for('main.book_details', id=borrow.book.id) }}" class="link-dark">{{ borrow.book.title }}</a><br>
+                                <span class="text-muted">{{ borrow.book.isbn }}&nbsp;</span> <br>
+                                Wypożyczono: {{ borrow.date.strftime("%d-%m-%Y") }} <br>
+                                <!-- TODO: chceck if delay -->
+                                {% if not borrow.return_date %}
+                                    <span class="text-danger">Nie oddano</span>
+                                {% else %}
+                                    <span class="text-success">Oddano ({{ borrow.return_date.strftime("%d-%m-%Y") }})</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <a href="{{ url_for('moderate.return_book', borrow_id=borrow.id) }}" class="btn btn-success m-1 {% if borrow.return_date %}disabled{% endif %}">
+                                    <abbr title="Zwrot">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bookmark-check-fill" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5zm8.854-9.646a.5.5 0 0 0-.708-.708L7.5 7.793 6.354 6.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0l3-3z"/>
+                                        </svg>
+                                    </abbr>
+                                </a> <br>
+                                <!-- <a href="#" class="btn btn-info m-1">
+                                    <abbr title="Prolonguj wypożyczenie">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-plus-fill" viewBox="0 0 16 16">
+                                            <path d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4V.5zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2zM8.5 8.5V10H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V11H6a.5.5 0 0 1 0-1h1.5V8.5a.5.5 0 0 1 1 0z"/>
+                                        </svg>
+                                    </abbr>
+                                </a> -->
+                            </div>
                         </div>
-                        <div>
-                            <a href="#" class="btn btn-success m-1">
-                                <abbr title="Oddaj">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bookmark-check-fill" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5zm8.854-9.646a.5.5 0 0 0-.708-.708L7.5 7.793 6.354 6.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0l3-3z"/>
-                                    </svg>
-                                </abbr>
-                            </a> <br>
-                            <a href="#" class="btn btn-info m-1">
-                                <abbr title="Prolonguj wypożyczenie">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-plus-fill" viewBox="0 0 16 16">
-                                        <path d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4V.5zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2zM8.5 8.5V10H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V11H6a.5.5 0 0 1 0-1h1.5V8.5a.5.5 0 0 1 1 0z"/>
-                                    </svg>
-                                </abbr>
-                            </a>
-                        </div>
-                    </div>
-                </li>
-            {% endfor %}
+                    </li>
+                {% endfor %}
+            {% else %}
+                <h2 class="text-muted">Brak wypożyczonych książek...</h2>
+            {% endif %}
             <div>&nbsp;</div>
-            {{ render_pagination(pagination, "moderate.list-borrows-book") }}
+            {{ render_pagination(pagination, "moderate.list_borrows_books") }}
         </ul>
     </div>
 </div>

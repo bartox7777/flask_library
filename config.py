@@ -31,7 +31,7 @@ class DevelopmentConfig(Config):
         "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
     # SQLALCHEMY_ECHO = True
     SQLALCHEMY_RECORD_QUERIES = True
-    BOOKS_PER_PAGE = 2
+    BOOKS_PER_PAGE = 5
 
 
 class TestingConfig(Config):

@@ -30,8 +30,7 @@ def process_covers(books, width=200, height=300, class_="img-thumbnail p-1 m-2")
                 <img
                     class={class_}
                     style="width: {width}px; height: {height}px"
-                    src="data:image/{cover.format.lower()};
-                    base64,{b64encode(cover_file_like.read()).decode()}">
+                    src="data:image/{cover.format.lower()};base64,{b64encode(cover_file_like.read()).decode()}">
             '''
         except:
             img_tag = f'''

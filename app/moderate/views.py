@@ -4,7 +4,9 @@ from flask import redirect
 from flask import url_for
 from flask import flash
 from flask import current_app
+from flask import abort
 
+import datetime
 from isbnlib import clean
 from isbnlib import desc
 from isbnlib import meta
@@ -215,13 +217,19 @@ def list_users():
         form=form
     )
 
-@moderate.route("/list-borrows-books/<int:user_id>", methods=("GET", "POST"))
+@moderate.route("/list-borrows-books/", methods=("GET", "POST"))
 @moderator_required
-def list_borrows_books(user_id):
+def list_borrows_books():
+    user_id = request.args.get("user_id", None, type=int)
+    if user_id is None:
+        abort(404)
     user = User.query.get_or_404(user_id)
     page = request.args.get("page", 1, type=int)
 
-    borrowed_books = Borrow.query.filter_by(user_id=user_id).order_by(Borrow.return_date).paginate(page, current_app.config["BOOKS_PER_PAGE"])
+    borrowed_books = Borrow.query. \
+        filter_by(user_id=user_id). \
+        order_by(Borrow.return_date.desc().nullsfirst()). \
+        paginate(page, current_app.config["BOOKS_PER_PAGE"])
 
     return render_template(
         "moderate/list_borrows_books.html",
@@ -232,3 +240,15 @@ def list_borrows_books(user_id):
         page=page,
         pagination=borrowed_books
     )
+
+@moderate.route("/return-book/<int:borrow_id>", methods=("GET", "POST"))
+@moderator_required
+def return_book(borrow_id):
+    borrow = Borrow.query.get_or_404(borrow_id)
+    if borrow.return_date:
+        flash("Ta książka została już zwrócona.", category="danger")
+        return redirect(url_for("moderate.list_borrows_books", user_id=borrow.user_id))
+    borrow.return_date = datetime.datetime.now()
+    db.session.commit()
+    flash("Zwrot książki przebiegł pomyślnie.", category="success")
+    return redirect(url_for("moderate.list_borrows_books", user_id=borrow.user_id))

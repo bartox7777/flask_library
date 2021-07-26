@@ -5,9 +5,11 @@
       {% if page != pagination.page %}
         <li class="page-item">
           {% if request.args.get("search_by") and request.args.get("phrase") %}
-              <a class="page-link" href="{{ url_for(endpoint, page=page, search_by=request.args.get("search_by"), phrase=request.args.get("phrase")) }}">{{ page }}</a>
+              <a class="page-link" href="{{ url_for(endpoint, page=page, search_by=request.args.get('search_by'), phrase=request.args.get('phrase')) }}">{{ page }}</a>
             {% elif request.args.get("phrase") %}
-              <a class="page-link" href="{{ url_for(endpoint, page=page, phrase=request.args.get("phrase")) }}">{{ page }}</a>
+              <a class="page-link" href="{{ url_for(endpoint, page=page, phrase=request.args.get('phrase')) }}">{{ page }}</a>
+            {% elif request.args.get("user_id") %}
+              <a class="page-link" href="{{ url_for(endpoint, page=page, user_id=request.args.get('user_id')) }}">{{ page }}</a>
             {% else %}
               <a class="page-link" href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
           {% endif %}
