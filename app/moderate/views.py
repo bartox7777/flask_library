@@ -15,6 +15,7 @@ from isbnlib import is_isbn13
 from sqlalchemy import or_
 
 from .forms import BookForm
+from .forms import UserForm
 from .forms import SearchUserForm
 from .forms import BorrowBookForm
 from . import moderate
@@ -24,6 +25,7 @@ from ..models import Book, PersonalData
 from ..models import User
 from ..models import Author
 from ..models import Borrow
+from ..models import Role
 from ..auth.decorators import moderator_required
 
 
@@ -252,3 +254,37 @@ def return_book(borrow_id):
     db.session.commit()
     flash("Zwrot książki przebiegł pomyślnie.", category="success")
     return redirect(url_for("moderate.list_borrows_books", user_id=borrow.user_id))
+
+@moderate.route("/edit-user/<int:user_id>", methods=("GET", "POST"))
+@moderator_required
+def edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    form = UserForm(request.form, obj=user.personal_data[0])
+    form.role.choices = [(role.id, role.name) for role in Role.query.filter_by()]
+
+    if form.validate_on_submit():
+        user.personal_data[0].name = form.name.data
+        user.personal_data[0].surname = form.surname.data
+        user.personal_data[0].phone_number = form.phone_number.data
+        user.personal_data[0].extended_city = form.extended_city.data
+        user.personal_data[0].extended_street = form.extended_street.data
+        user.email = form.email.data
+        user.role_id = form.role.data
+        user.activated = form.activated.data
+        db.session.commit()
+        flash("Pomyślnie zedytowano dane.", "success")
+        return redirect(url_for("moderate.edit_user", user_id=user.id))
+
+    form.email.data = user.email
+    form.activated.data = user.activated
+    form.role.data = str(user.role_id)
+
+    return render_template(
+        "moderate/user_form.html",
+        title="Edytuj użytkownika",
+        form=form,
+        dont_show_search_bar=True,
+        heading="Edytuj dane użytkownika"
+    )
+

@@ -35,6 +35,11 @@
     {% endif %}
 {% endmacro %}
 
+{% macro render_checkbox(field) %}
+    {{ field(class="form-check-input", **kwargs)}}
+    {{ field.label }}
+{% endmacro %}
+
 {% macro render_submit(field) %}
     {{ field(class="btn btn-secondary", **kwargs)|safe }}
 {% endmacro %}

@@ -1,8 +1,7 @@
-import os
-from datetime import datetime
-
 from flask import request
 
+import os
+from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms import SubmitField
@@ -10,13 +9,16 @@ from wtforms import IntegerField
 from wtforms import FileField
 from wtforms import TextAreaField
 from wtforms import SelectField
+from wtforms.fields.core import BooleanField
 from wtforms.validators import DataRequired
+from wtforms.validators import Email
 from wtforms.validators import NumberRange
 from wtforms.validators import ValidationError
 from isbnlib import is_isbn10
 from isbnlib import is_isbn13
 from isbnlib import clean
 
+from ..models import Role
 
 class BookForm(FlaskForm):
     isbn = StringField("ISBN", validators=[DataRequired()])
@@ -61,4 +63,16 @@ class BorrowBookForm(FlaskForm):
 
 class SearchUserForm(FlaskForm):
     phrase = StringField("Dane użytkownika")
+    submit = SubmitField()
+
+
+class UserForm(FlaskForm):
+    name = StringField("Imię", validators=[DataRequired()])
+    surname = StringField("Nazwisko", validators=[DataRequired()])
+    phone_number = StringField("Numer telefonu")
+    extended_city = StringField("Miejscowość i kod pocztowy")
+    extended_street = StringField("Ulica i numer mieszkania")
+    email = StringField("E-mail", validators=[Email()])
+    activated = BooleanField("Konto aktywne")
+    role = SelectField("Rola", validate_choice=False)
     submit = SubmitField()

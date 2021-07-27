@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "macros/_form.html" import render_floating_input %}
+{% from "macros/_form.html" import render_select %}
+{% from "macros/_form.html" import render_checkbox %}
+{% from "macros/_form.html" import render_submit %}
+
+
+{% block content %}
+    <div class="container bg-light mt-3 p-5 border">
+        <h1 class="text-center">{{ heading }}</h1>
+        <div class="d-flex justify-content-center my-5">
+            <form method="POST" style="min-width: 40%;">
+                {{ form.csrf_token }}
+                {{ render_floating_input(form.name) }}
+                {{ render_floating_input(form.surname) }}
+                {{ render_floating_input(form.phone_number) }}
+                {{ render_floating_input(form.extended_city) }}
+                {{ render_floating_input(form.extended_street) }}
+                {{ render_floating_input(form.email) }}
+                {{ render_checkbox(form.activated) }}
+                {{ render_select(form.role) }}
+                <div class="text-center">
+                    {{ render_submit(form.submit, value=button_value) }}
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

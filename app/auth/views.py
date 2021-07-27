@@ -9,10 +9,13 @@ from flask_login import login_user
 from flask_login import logout_user
 from flask_login import current_user
 from flask_login import login_required
+from flask_login import fresh_login_required
 
+from app import db
 from . import auth
 from ..models import User
 from .forms import LoginForm
+from .forms import ChangePasswordForm
 
 
 @auth.route("/login", methods=("GET", "POST"))
@@ -40,7 +43,12 @@ def login():
         flash("Nieprawidłowe dane logowania.", "warning")
 
 
-    return render_template("auth/login.html", title="Login", form=form, dont_show_navbar=True, dont_show_search_bar=True)
+    return render_template("auth/login.html",
+        title="Login",
+        form=form,
+        dont_show_navbar=True,
+        dont_show_search_bar=True
+    )
 
 @auth.route("/logout", methods=("GET", "POST"))
 @login_required
@@ -48,3 +56,20 @@ def logout():
     flash("Pomyślnie wylogowano.", "success")
     logout_user()
     return redirect(url_for("main.index"))
+
+@auth.route("/change-password", methods=("GET", "POST"))
+@fresh_login_required
+def change_password():
+    form = ChangePasswordForm(request.form)
+
+    if form.validate_on_submit():
+        current_user.password = form.password.data
+        db.session.commit()
+        flash("Zmiana hasła przebiegła pomyślnie.", category="success")
+
+    return render_template(
+        "auth/change_password.html",
+        title="Zmiana hasła",
+        password_form=form,
+        dont_show_search_bar=True
+    )
