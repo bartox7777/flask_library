@@ -84,7 +84,8 @@ def add_book():
         title="Dodaj książkę",
         dont_show_search_bar=True,
         form=form,
-        heading="Dodaj książkę do księgozbioru"
+        heading="Dodaj książkę do księgozbioru",
+        button_value="Dodaj książkę"
     )
 
 @moderate.route("/edit-book/<int:id>", methods=("GET", "POST"))
@@ -285,6 +286,7 @@ def edit_user(user_id):
         title="Edytuj użytkownika",
         form=form,
         dont_show_search_bar=True,
-        heading="Edytuj dane użytkownika"
+        heading="Edytuj dane użytkownika",
+        button_value="Edytuj użytkownika"
     )
 
