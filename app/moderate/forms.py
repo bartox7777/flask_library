@@ -18,7 +18,6 @@ from isbnlib import is_isbn10
 from isbnlib import is_isbn13
 from isbnlib import clean
 
-from ..models import Role
 
 class BookForm(FlaskForm):
     isbn = StringField("ISBN", validators=[DataRequired()])

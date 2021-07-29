@@ -6,6 +6,8 @@ from flask import flash
 from flask import current_app
 from flask import abort
 
+import random
+import string
 import datetime
 from isbnlib import clean
 from isbnlib import desc
@@ -290,3 +292,56 @@ def edit_user(user_id):
         button_value="Edytuj użytkownika"
     )
 
+@moderate.route("/add-user", methods=("GET", "POST"))
+@moderator_required
+def add_user():
+    form = UserForm(request.form)
+    form.role.choices = [(role.id, role.name) for role in Role.query.all()]
+    if form.validate_on_submit():
+        error = False
+        if User.query.filter_by(email=form.email.data).first():
+            form.email.errors.append("Ten email jest już przypisany.")
+            error = True
+        if PersonalData.query.filter_by(phone_number=form.phone_number.data).first():
+            form.phone_number.errors.append("Ten numer telefonu jest już przypisany.")
+            error = True
+
+        if not error:
+            password = "".join(random.choices(string.ascii_letters+string.digits, k=8))
+
+            new_user = User(
+                email=form.email.data,
+                role_id=form.role.data,
+                password=password,
+            )
+            db.session.add(new_user)
+            db.session.commit()
+
+            new_user_personal_data = PersonalData(
+                name=form.name.data,
+                surname=form.surname.data,
+                phone_number=form.phone_number.data,
+                extended_city=form.extended_city.data,
+                extended_street=form.extended_street.data,
+                user_id=new_user.id
+            )
+            db.session.add(new_user_personal_data)
+            db.session.commit()
+
+            print(f"EMAIL TO: {new_user.email}\nPASSWORD: {password}")
+            flash(f"Użytkownik {new_user.personal_data[0].name} {new_user.personal_data[0].surname} dodany pomyślnie.", "success")
+            flash(f"Hasło zostało wysłane na podanego e-maila.", "info")
+            return redirect(url_for("moderate.edit_user", user_id=new_user.id))
+
+    role_user_id = Role.query.filter_by(name="user").first().id
+    form.role.data = str(role_user_id)
+    form.activated.render_kw = {"disabled": True}
+
+    return render_template(
+        "moderate/user_form.html",
+        title="Dodaj użytkownika",
+        form=form,
+        dont_show_search_bar=True,
+        heading="Dodaj nowego użytkownika",
+        button_value="Dodaj użytkownika"
+    )
