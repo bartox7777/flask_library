@@ -65,7 +65,7 @@ def change_password():
     if form.validate_on_submit():
         current_user.password = form.password.data
         db.session.commit()
-        flash("Zmiana hasła przebiegła pomyślnie.", category="success")
+        flash("Zmiana hasła przebiegła pomyślnie.", "success")
 
     return render_template(
         "auth/change_password.html",

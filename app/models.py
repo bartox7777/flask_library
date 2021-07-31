@@ -1,7 +1,8 @@
+__all__ = ["User", "PersonalData", "Permission", "Role", "Book", "Author", "Borrow"]
+
 from flask_login import UserMixin
 
 from datetime import datetime
-from datetime import timedelta
 
 from . import db
 from werkzeug.security import generate_password_hash
@@ -103,5 +104,5 @@ class Borrow(db.Model):
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     prolong_times = db.Column(db.Integer, default=0, nullable=False)
-    predicted_return_date = db.Column(db.DateTime(), default=datetime.utcnow)
+    predicted_return_date = db.Column(db.DateTime(), nullable=False)
     return_date = db.Column(db.DateTime, default=None)

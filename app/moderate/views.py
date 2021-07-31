@@ -111,7 +111,7 @@ def edit_book(id):
             book.cover = cover
         db.session.commit()
 
-        flash("Edycja książki przebiegła pomyślnie.", category="success")
+        flash("Edycja książki przebiegła pomyślnie.", "success")
         return redirect(url_for("main.book_details", id=book.id))
 
     form.category.choices = [category[0] for category in db.session.query(Book.category).distinct().all()]
@@ -139,7 +139,7 @@ def borrow_book(id):
     book = Book.query.get_or_404(id)
     borrows = [borrow for borrow in book.borrows if borrow.return_date is None]
     if len(borrows) >= book.number_of_copies:
-        flash("Brak dostępnych kopii do wypożyczenia.", category="danger")
+        flash("Brak dostępnych kopii do wypożyczenia.", "danger")
         return redirect(url_for("main.book_details", id=book.id))
 
     if form.validate_on_submit():
@@ -149,10 +149,11 @@ def borrow_book(id):
         borrow = Borrow(
             user_id=user_id,
             book_id=book.id,
+            predicted_return_date=datetime.datetime.now() + datetime.timedelta(days=current_app.config["DEFAULT_BORROWING_DAYS"])
         )
         db.session.add(borrow)
         db.session.commit()
-        flash("Pomyślnie wypożyczono książkę.", category="success")
+        flash("Pomyślnie wypożyczono książkę.", "success")
         return redirect(url_for("main.book_details", id=book.id))
 
     return render_template(
@@ -243,7 +244,9 @@ def list_borrows_books():
         heading=f"Wypożyczenia użytkownika {user.personal_data[0].name} {user.personal_data[0].surname}",
         borrowed_books=borrowed_books.items,
         page=page,
-        pagination=borrowed_books
+        pagination=borrowed_books,
+        datetime_now=datetime.datetime.now(),
+        max_prolongs=current_app.config["MAX_PROLONG_TIMES"]
     )
 
 @moderate.route("/return-book/<int:borrow_id>", methods=("GET", "POST"))
@@ -251,11 +254,11 @@ def list_borrows_books():
 def return_book(borrow_id):
     borrow = Borrow.query.get_or_404(borrow_id)
     if borrow.return_date:
-        flash("Ta książka została już zwrócona.", category="danger")
+        flash("Ta książka została już zwrócona.", "danger")
         return redirect(url_for("moderate.list_borrows_books", user_id=borrow.user_id))
     borrow.return_date = datetime.datetime.now()
     db.session.commit()
-    flash("Zwrot książki przebiegł pomyślnie.", category="success")
+    flash("Zwrot książki przebiegł pomyślnie.", "success")
     return redirect(url_for("moderate.list_borrows_books", user_id=borrow.user_id))
 
 @moderate.route("/edit-user/<int:user_id>", methods=("GET", "POST"))
@@ -345,3 +348,18 @@ def add_user():
         heading="Dodaj nowego użytkownika",
         button_value="Dodaj użytkownika"
     )
+
+@moderate.route("/prolong_borrow/<int:borrow_id>", methods=("GET", "POST"))
+@moderator_required
+def prolong_borrow(borrow_id):
+    borrow = Borrow.query.get_or_404(borrow_id)
+    max_prolong = current_app.config["MAX_PROLONG_TIMES"]
+    if borrow.prolong_times >= max_prolong:
+        flash(f"Wykorzystano maksymalną liczbę przedłużeń ({max_prolong}).", "danger")
+    else:
+        borrow.predicted_return_date += datetime.timedelta(days=current_app.config["PROLONG_DAYS"])
+        borrow.prolong_times += 1
+        db.session.commit()
+        flash(f"Pomyślnie przedłużono wypożyczenie.", "success")
+
+    return redirect(url_for("moderate.list_borrows_books", user_id=borrow.user_id))
