@@ -3,6 +3,7 @@ from flask.cli import with_appcontext
 
 import os
 import click
+import datetime
 from faker import Faker
 from random import randint
 from random import choice
@@ -96,7 +97,11 @@ def insert_test_data(additional_users, books):
         db.session.add(book)
     db.session.commit()
 
-    borrow = Borrow(user_id=test_user.id, book_id=book.id)
+    borrow = Borrow(
+        user_id=test_user.id,
+        book_id=book.id,
+        predicted_return_date=datetime.datetime.now() + datetime.timedelta(days=current_app.config["PROLONG_DAYS"])
+    )
     db.session.add(borrow)
     db.session.commit()
     click.echo("Inserted test data.")

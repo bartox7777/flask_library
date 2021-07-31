@@ -12,6 +12,7 @@ class Config:
     USERS_PER_PAGE = 5
     MAX_PROLONG_TIMES = 1
     DEFAULT_BORROWING_DAYS = 14
+    PROLONG_DAYS = 14
     MAX_CONTENT_LENGTH = 16 * 1000 * 1000  # 16 MB
 
     # @staticmethod
