@@ -10,6 +10,8 @@
               <a class="page-link" href="{{ url_for(endpoint, page=page, phrase=request.args.get('phrase')) }}">{{ page }}</a>
             {% elif request.args.get("user_id") %}
               <a class="page-link" href="{{ url_for(endpoint, page=page, user_id=request.args.get('user_id')) }}">{{ page }}</a>
+            {% elif request.args.get("book_id") %}
+              <a class="page-link" href="{{ url_for(endpoint, page=page, book_id=request.args.get('book_id')) }}">{{ page }}</a>
             {% else %}
               <a class="page-link" href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
           {% endif %}

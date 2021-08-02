@@ -108,9 +108,9 @@ def search():
         advanced_search=True
     )
 
-@main.route("/book-details/<int:id>", methods=("GET", "POST"))
-def book_details(id):
-    book = Book.query.get_or_404(id)
+@main.route("/book-details/<int:book_id>", methods=("GET", "POST"))
+def book_details(book_id):
+    book = Book.query.get_or_404(book_id)
     cover = process_covers([book])[0][1]
     borrows = [borrow for borrow in book.borrows if borrow.return_date is None]
     available_copies = book.number_of_copies - len(borrows)

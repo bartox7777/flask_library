@@ -61,7 +61,7 @@ def add_book():
 
         db.session.add(new_book)
         db.session.commit()
-        return redirect(url_for("main.book_details", id=new_book.id))
+        return redirect(url_for("main.book_details", book_id=new_book.id))
     elif form.isbn.data:
         isbn = clean(form.isbn.data)
         if is_isbn13(isbn) or is_isbn10(isbn):
@@ -90,10 +90,10 @@ def add_book():
         button_value="Dodaj książkę"
     )
 
-@moderate.route("/edit-book/<int:id>", methods=("GET", "POST"))
+@moderate.route("/edit-book/<int:book_id>", methods=("GET", "POST"))
 @moderator_required
-def edit_book(id):
-    book = Book.query.get_or_404(id)
+def edit_book(book_id):
+    book = Book.query.get_or_404(book_id)
     form = BookForm(request.form, obj=book)
 
     if form.validate_on_submit():
@@ -112,7 +112,7 @@ def edit_book(id):
         db.session.commit()
 
         flash("Edycja książki przebiegła pomyślnie.", "success")
-        return redirect(url_for("main.book_details", id=book.id))
+        return redirect(url_for("main.book_details", book_id=book.id))
 
     form.category.choices = [category[0] for category in db.session.query(Book.category).distinct().all()]
     form.author.choices = [(author.id, author.full_name) for author in Author.query.all()]
@@ -131,16 +131,16 @@ def edit_book(id):
         button_value="Edytuj książkę"
     )
 
-@moderate.route("/borrow-book/<int:id>", methods=("GET", "POST"))
+@moderate.route("/borrow-book/<int:book_id>", methods=("GET", "POST"))
 @moderator_required
-def borrow_book(id):
+def borrow_book(book_id):
     form = BorrowBookForm()
     form.users.choices = [(user.id, f"{user.personal_data[0].name} {user.personal_data[0].surname} ({ user.id })") for user in User.query.all()]
-    book = Book.query.get_or_404(id)
+    book = Book.query.get_or_404(book_id)
     borrows = [borrow for borrow in book.borrows if borrow.return_date is None]
     if len(borrows) >= book.number_of_copies:
         flash("Brak dostępnych kopii do wypożyczenia.", "danger")
-        return redirect(url_for("main.book_details", id=book.id))
+        return redirect(url_for("main.book_details", book_id=book.id))
 
     if form.validate_on_submit():
         user_id = form.users.data
@@ -154,7 +154,7 @@ def borrow_book(id):
         db.session.add(borrow)
         db.session.commit()
         flash("Pomyślnie wypożyczono książkę.", "success")
-        return redirect(url_for("main.book_details", id=book.id))
+        return redirect(url_for("main.book_details", book_id=book.id))
 
     return render_template(
         "moderate/borrow_book.html",
@@ -255,11 +255,11 @@ def return_book(borrow_id):
     borrow = Borrow.query.get_or_404(borrow_id)
     if borrow.return_date:
         flash("Ta książka została już zwrócona.", "danger")
-        return redirect(url_for("moderate.list_borrows_books", user_id=borrow.user_id))
+        return redirect(request.referrer or url_for("moderate.list_borrows_books", user_id=borrow.user_id))
     borrow.return_date = datetime.datetime.now()
     db.session.commit()
     flash("Zwrot książki przebiegł pomyślnie.", "success")
-    return redirect(url_for("moderate.list_borrows_books", user_id=borrow.user_id))
+    return redirect(request.referrer or url_for("moderate.list_borrows_books", user_id=borrow.user_id))
 
 @moderate.route("/edit-user/<int:user_id>", methods=("GET", "POST"))
 @moderator_required
@@ -362,4 +362,29 @@ def prolong_borrow(borrow_id):
         db.session.commit()
         flash(f"Pomyślnie przedłużono wypożyczenie.", "success")
 
-    return redirect(url_for("moderate.list_borrows_books", user_id=borrow.user_id))
+    return redirect(request.referrer or url_for("moderate.list_borrows_books", user_id=borrow.user_id))
+
+@moderate.route("/list-borrows-users")
+@moderator_required
+def list_borrows_users():
+    book_id = request.args.get("book_id", None, int)
+    if book_id is None:
+        abort(404)
+    page = request.args.get("page", 1, int)
+
+    book = Book.query.get_or_404(book_id)
+    borrows = Borrow.query. \
+        filter_by(book_id=book.id). \
+        order_by(Borrow.return_date.desc().nullsfirst()). \
+        paginate(page, current_app.config["USERS_PER_PAGE"])
+
+    return render_template(
+        "moderate/list_borrows_users.html",
+        title="Wypożyczenia",
+        heading=f"Wypożyczenia książki \"{book.title}\"",
+        dont_show_search_bar=True,
+        borrows=borrows.items,
+        pagination=borrows,
+        datetime_now=datetime.datetime.now(),
+        max_prolongs=current_app.config["MAX_PROLONG_TIMES"]
+    )

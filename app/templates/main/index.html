@@ -7,7 +7,7 @@
     <div class="text-center d-flex flex-wrap justify-content-around mt-3">
         {% for book, cover in newest_books %}
             <div class="m-2">
-                <a href="{{ url_for('main.book_details', id=book.id) }}" class="link-dark">
+                <a href="{{ url_for('main.book_details', book_id=book.id) }}" class="link-dark">
                     {{ cover|safe }} <br>
                     <div style="max-width: 200px;">{{ book.title }}</div>
                 </a>
