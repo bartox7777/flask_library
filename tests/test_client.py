@@ -73,7 +73,7 @@ class ClientTestCase(unittest.TestCase):
             password="test"),
             follow_redirects=True)
             self.assertEqual(response.status_code, 200)
-            full_name = f"{current_user.personal_data[0].name} {current_user.personal_data[0].surname}"
+            full_name = f"{current_user.full_name}"
             self.assertTrue(full_name in response.get_data(as_text=True))
             self.assertTrue(b"Wyloguj" in response.get_data())
 

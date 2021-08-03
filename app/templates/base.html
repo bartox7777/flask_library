@@ -74,7 +74,7 @@
                         <a class="nav-link" href="{{ url_for('auth.logout') }}">
                             Wyloguj
                             <span class="small text-muted">
-                                [{{ current_user.personal_data[0].name }} {{ current_user.personal_data[0].surname }}]
+                                [{{ current_user.full_name }}]
                             </span>
                         </a>
                     </div>

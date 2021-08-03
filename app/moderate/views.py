@@ -136,7 +136,7 @@ def edit_book(book_id):
 @moderator_required
 def borrow_book(book_id):
     form = BorrowBookForm()
-    form.users.choices = [(user.id, f"{user.personal_data[0].name} {user.personal_data[0].surname} ({ user.id })") for user in User.query.all()]
+    form.users.choices = [(user.id, f"{user.full_name} ({ user.id })") for user in User.query.all()]
     book = Book.query.get_or_404(book_id)
     borrows = [borrow for borrow in book.borrows if borrow.return_date is None]
     if len(borrows) >= book.number_of_copies:
@@ -242,7 +242,7 @@ def list_borrows_books():
         "moderate/list_borrows_books.html",
         title="Wypożyczenia",
         dont_show_search_bar=True,
-        heading=f"Wypożyczenia użytkownika {user.personal_data[0].name} {user.personal_data[0].surname}",
+        heading=f"Wypożyczenia użytkownika {user.full_name}",
         borrowed_books=borrowed_books.items,
         page=page,
         pagination=borrowed_books,
@@ -334,7 +334,7 @@ def add_user():
             db.session.commit()
 
             print(f"EMAIL TO: {new_user.email}\nPASSWORD: {password}")
-            flash(f"Użytkownik {new_user.personal_data[0].name} {new_user.personal_data[0].surname} dodany pomyślnie.", "success")
+            flash(f"Użytkownik { new_user.full_name } dodany pomyślnie.", "success")
             flash(f"Hasło zostało wysłane na podanego e-maila.", "info")
             return redirect(url_for("moderate.edit_user", user_id=new_user.id))
 

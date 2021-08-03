@@ -32,8 +32,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <span class="text-muted">{{ user.id }}&nbsp;</span>
-                            {{ user.personal_data[0].name }}
-                            {{ user.personal_data[0].surname }}
+                            {{ user.full_name}}
                         </div>
                         <div>
                             <a href="{{ url_for('moderate.list_borrows_books', user_id=user.id) }}" class="btn btn-primary m-1">

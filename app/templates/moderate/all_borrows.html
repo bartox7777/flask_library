@@ -13,7 +13,7 @@
                     <li class="list-group-item">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <a href="{{ url_for('moderate.list_users', phrase=borrow.user_id) }}" class="link-dark">{{ borrow.user.personal_data[0].name }} {{ borrow.user.personal_data[0].surname }}</a>
+                                <a href="{{ url_for('moderate.list_users', phrase=borrow.user_id) }}" class="link-dark">{{ borrow.user.full_name }}</a>
                                 <span class="text-muted">({{ borrow.user_id }})</span> <br>
                                 <span class="text-muted">{{ borrow.book.title }}</span>
                                 <span class="text-muted">({{ borrow.book.isbn }})</span> <br>

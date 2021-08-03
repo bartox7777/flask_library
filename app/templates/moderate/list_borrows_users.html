@@ -13,7 +13,7 @@
                     <li class="list-group-item">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <a href="{{ url_for('moderate.list_users', phrase=borrow.user_id) }}" class="link-dark">{{ borrow.user.personal_data[0].name }} {{ borrow.user.personal_data[0].surname }}</a><br>
+                                <a href="{{ url_for('moderate.list_users', phrase=borrow.user_id) }}" class="link-dark">{{ borrow.user.full_name }}</a><br>
                                 <span class="text-muted">{{ borrow.user_id }}&nbsp;</span> <br>
                                 Wypożyczono: {{ borrow.date.strftime("%d-%m-%Y") }} <br>
                                 Przewidywany zwrot:
