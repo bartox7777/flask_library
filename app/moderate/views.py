@@ -388,3 +388,23 @@ def list_borrows_users():
         datetime_now=datetime.datetime.now(),
         max_prolongs=current_app.config["MAX_PROLONG_TIMES"]
     )
+
+@moderate.route("/all-borrows", methods=("GET", "POST"))
+@moderator_required
+def all_borrows():
+    page = request.args.get("page", 1, int)
+
+    borrows = Borrow.query. \
+    order_by(Borrow.return_date.desc().nullsfirst()). \
+    paginate(page, current_app.config["USERS_PER_PAGE"])
+
+    return render_template(
+        "moderate/all_borrows.html",
+        title="Wszystkie wypożyczenia",
+        heading="Wszystkie wypożyczenia książek",
+        borrows=borrows.items,
+        pagination=borrows,
+        dont_show_search_bar=True,
+        datetime_now=datetime.datetime.now(),
+        max_prolongs=current_app.config["MAX_PROLONG_TIMES"]
+    )

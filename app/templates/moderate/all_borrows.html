@@ -8,13 +8,15 @@
     <hr>
     <div class="d-flex justify-content-center my-5">
         <ul class="list-group" style="min-width: 40%;">
-            {% if borrowed_books %}
-                {% for borrow in borrowed_books %}
+            {% if borrows %}
+                {% for borrow in borrows %}
                     <li class="list-group-item">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <a href="{{ url_for('main.book_details', book_id=borrow.book.id) }}" class="link-dark">{{ borrow.book.title }}</a><br>
-                                <span class="text-muted">{{ borrow.book.isbn }}&nbsp;</span> <br>
+                                <a href="{{ url_for('moderate.list_users', phrase=borrow.user_id) }}" class="link-dark">{{ borrow.user.personal_data[0].name }} {{ borrow.user.personal_data[0].surname }}</a>
+                                <span class="text-muted">({{ borrow.user_id }})</span> <br>
+                                <span class="text-muted">{{ borrow.book.title }}</span>
+                                <span class="text-muted">({{ borrow.book.isbn }})</span> <br>
                                 Wypożyczono: {{ borrow.date.strftime("%d-%m-%Y") }} <br>
                                 Przewidywany zwrot:
                                 {% if borrow.predicted_return_date < datetime_now and not borrow.return_date %}
@@ -52,10 +54,10 @@
                     </li>
                 {% endfor %}
             {% else %}
-                <h2 class="text-muted text-center">Brak wypożyczonych książek...</h2>
+                <h2 class="text-muted text-center">Brak wypożyczeń...</h2>
             {% endif %}
             <div>&nbsp;</div>
-            {{ render_pagination(pagination, "moderate.list_borrows_books") }}
+            {{ render_pagination(pagination, "moderate.list_borrows_users") }}
         </ul>
     </div>
 </div>
