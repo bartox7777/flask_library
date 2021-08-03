@@ -15,3 +15,12 @@ def moderator_required(view):
             abort(403)
         return view(*args, **kwargs)
     return check_permissions
+
+def admin_required(view):
+    @login_required
+    @wraps(view)
+    def check_permissions(*args, **kwargs):
+        if not current_user.can(Permission.ADMIN):
+            abort(403)
+        return view(*args, **kwargs)
+    return check_permissions

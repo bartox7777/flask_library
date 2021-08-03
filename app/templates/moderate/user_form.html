@@ -20,9 +20,25 @@
                 {{ render_checkbox(form.activated) }}
                 {{ render_select(form.role) }}
                 <div class="text-center">
-                    {{ render_submit(form.submit, value=button_value) }}
+                    {{ render_submit(form.submit, value=button_value) }} <br>
                 </div>
+                {% if current_user.role.name == "admin" %}
+                    <div class="text-center mt-5">
+                        <hr>
+                        <a href="#" class="btn btn-danger" id="delete-user">Usuń użytkownika</a>
+                    </div>
+                {% endif %}
             </form>
         </div>
     </div>
+
+    <script>
+        btn = document.querySelector("#delete-user");
+        btn.addEventListener("click", function(event){
+            event.preventDefault();
+            if (confirm("Czy na pewno chcesz usunąć użytkownika {{ user.full_name }}?\n\nUsunięte zostaną dane personalne oraz wypożyczenia użytkownika.")){
+                location.href = "{{ url_for('moderate.delete_user', user_id=user.id) }}";
+            }
+        })
+    </script>
 {% endblock content %}

@@ -29,6 +29,7 @@ from ..models import Author
 from ..models import Borrow
 from ..models import Role
 from ..auth.decorators import moderator_required
+from ..auth.decorators import admin_required
 
 
 @moderate.route("/add-book", methods=("GET", "POST"))
@@ -292,7 +293,8 @@ def edit_user(user_id):
         form=form,
         dont_show_search_bar=True,
         heading="Edytuj dane użytkownika",
-        button_value="Edytuj użytkownika"
+        button_value="Edytuj użytkownika",
+        user=user
     )
 
 @moderate.route("/add-user", methods=("GET", "POST"))
@@ -408,3 +410,12 @@ def all_borrows():
         datetime_now=datetime.datetime.now(),
         max_prolongs=current_app.config["MAX_PROLONG_TIMES"]
     )
+
+@moderate.route("/delete-user/<int:user_id>", methods=("GET", "POST"))
+@admin_required
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash("Pomyślnie usunięto użytkownika.", "success")
+    return redirect(url_for("moderate.list_users"))

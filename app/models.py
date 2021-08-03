@@ -12,13 +12,13 @@ from werkzeug.security import check_password_hash
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, nullable=False, unique=True)
-    personal_data = db.relationship("PersonalData", backref="user")
+    personal_data = db.relationship("PersonalData", backref="user", cascade="all, delete-orphan")
     password_hash = db.Column(db.String, nullable=False)
     activated = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     modified_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
-    borrows = db.relationship("Borrow", backref="user")
+    borrows = db.relationship("Borrow", backref="user", cascade="all, delete-orphan")
 
     def is_active(self):
         return self.activated
@@ -39,6 +39,9 @@ class User(UserMixin, db.Model):
             return True
         return False
 
+    @property
+    def full_name(self):
+        return f"{self.personal_data[0].name} {self.personal_data[0].surname}"
 
 class PersonalData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
