@@ -13,40 +13,12 @@
                     <li class="list-group-item">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <a href="{{ url_for('main.book_details', book_id=borrow.book.id) }}" class="link-dark">{{ borrow.book.title }}</a><br>
-                                <span class="text-muted">{{ borrow.book.isbn }}&nbsp;</span> <br>
-                                Wypożyczono: {{ borrow.date.strftime("%d-%m-%Y") }} <br>
-                                Przewidywany zwrot:
-                                {% if borrow.predicted_return_date < datetime_now and not borrow.return_date %}
-                                    <span class="text-danger">
-                                        {{ borrow.predicted_return_date.strftime("%d-%m-%Y") }} (opóźnienie)
-                                    </span>
-                                {% else %}
-                                    {{ borrow.predicted_return_date.strftime("%d-%m-%Y") }}
-                                {% endif %}
-                                <br>
-                                Liczba przedłużeń: {{ borrow.prolong_times }} / {{ max_prolongs }} <br>
-                                {% if not borrow.return_date %}
-                                    <span class="text-warning">Nie oddano</span>
-                                {% else %}
-                                    <span class="text-success">Oddano ({{ borrow.return_date.strftime("%d-%m-%Y") }})</span>
-                                {% endif %}
+                                <a href="{{ url_for('main.book_details', book_id=borrow.book.id) }}" class="link-dark">{{ borrow.book.title }}</a>
+                                <span class="text-muted">({{ borrow.book.isbn }})</span> <br>
+                                {% include "moderate/includes/borrow_info.html" %}
                             </div>
                             <div>
-                                <a href="{{ url_for('moderate.return_book', borrow_id=borrow.id) }}" class="btn btn-success m-1 {% if borrow.return_date %}disabled{% endif %}">
-                                    <abbr title="Zwrot">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bookmark-check-fill" viewBox="0 0 16 16">
-                                            <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5zm8.854-9.646a.5.5 0 0 0-.708-.708L7.5 7.793 6.354 6.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0l3-3z"/>
-                                        </svg>
-                                    </abbr>
-                                </a> <br>
-                                <a href="{{ url_for('moderate.prolong_borrow', borrow_id=borrow.id) }}" class="btn btn-info m-1 {% if borrow.return_date or borrow.prolong_times >= max_prolongs %}disabled{% endif %}">
-                                    <abbr title="Prolonguj wypożyczenie">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-plus-fill" viewBox="0 0 16 16">
-                                            <path d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4V.5zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2zM8.5 8.5V10H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V11H6a.5.5 0 0 1 0-1h1.5V8.5a.5.5 0 0 1 1 0z"/>
-                                        </svg>
-                                    </abbr>
-                                </a>
+                                {% include "moderate/includes/borrow_buttons.html" %}
                             </div>
                         </div>
                     </li>

@@ -92,7 +92,7 @@ class Book(db.Model):
     publisher = db.Column(db.String)
     pages = db.Column(db.Integer)
     year = db.Column(db.Integer)
-    borrows = db.relationship("Borrow", backref="book")
+    borrows = db.relationship("Borrow", backref="book", cascade="all, delete-orphan")
 
 
 class Author(db.Model):

@@ -1,0 +1,16 @@
+Wypożyczono: {{ borrow.date.strftime("%d-%m-%Y") }} <br>
+Przewidywany zwrot:
+{% if borrow.predicted_return_date < datetime_now and not borrow.return_date %}
+<span class="text-danger">
+    {{ borrow.predicted_return_date.strftime("%d-%m-%Y") }} (opóźnienie)
+</span>
+{% else %}
+{{ borrow.predicted_return_date.strftime("%d-%m-%Y") }}
+{% endif %}
+<br>
+Liczba przedłużeń: {{ borrow.prolong_times }} / {{ max_prolongs }} <br>
+{% if not borrow.return_date %}
+<span class="text-warning">Nie oddano</span>
+{% else %}
+<span class="text-success">Oddano ({{ borrow.return_date.strftime("%d-%m-%Y") }})</span>
+{% endif %}

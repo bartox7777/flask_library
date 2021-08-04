@@ -37,6 +37,12 @@
                 <div class="text-center">
                     {{ render_submit(form.submit, value=button_value) }}
                 </div>
+                {% if editing and current_user.role.name == "admin" %}
+                    <div class="text-center mt-5">
+                        <hr>
+                        <a href="#" class="btn btn-danger" id="delete-book">Usuń książkę</a>
+                    </div>
+                {% endif %}
             </form>
         </div>
     </div>
@@ -96,6 +102,15 @@
             )
         });
 
+        {% if editing %}
+            btn = document.querySelector("#delete-book");
+            btn.addEventListener("click", function(event){
+                event.preventDefault();
+                if (confirm("Czy na pewno chcesz usunąć ksiażkę {{ book.title }}?\n\nUsunięte zostaną też wszystkie jej wypożyczenia.")){
+                    location.href = "{{ url_for('moderate.delete_book', book_id=book.id) }}";
+                }
+            })
+        {% endif %}
     </script>
 
 {% endblock content %}

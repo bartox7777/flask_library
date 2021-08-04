@@ -129,7 +129,9 @@ def edit_book(book_id):
         dont_show_search_bar=True,
         form=form,
         heading="Edytuj książkę z księgozbioru",
-        button_value="Edytuj książkę"
+        button_value="Edytuj książkę",
+        editing=True,
+        book=book
     )
 
 @moderate.route("/borrow-book/<int:book_id>", methods=("GET", "POST"))
@@ -147,6 +149,9 @@ def borrow_book(book_id):
         user_id = form.users.data
         if form.user_id.data:
             user_id = form.user_id.data
+        if User.query.get(user_id) is None:
+            flash("Brak użytkownika o tym ID.", "danger")
+            return redirect(url_for("moderate.borrow_book", book_id=book.id))
         borrow = Borrow(
             user_id=user_id,
             book_id=book.id,
@@ -250,7 +255,7 @@ def list_borrows_books():
         max_prolongs=current_app.config["MAX_PROLONG_TIMES"]
     )
 
-@moderate.route("/return-book/<int:borrow_id>", methods=("GET", "POST"))
+@moderate.route("/return-book/<int:borrow_id>", methods=("GET",))
 @moderator_required
 def return_book(borrow_id):
     borrow = Borrow.query.get_or_404(borrow_id)
@@ -351,7 +356,7 @@ def add_user():
         button_value="Dodaj użytkownika"
     )
 
-@moderate.route("/prolong_borrow/<int:borrow_id>", methods=("GET", "POST"))
+@moderate.route("/prolong_borrow/<int:borrow_id>", methods=("GET",))
 @moderator_required
 def prolong_borrow(borrow_id):
     borrow = Borrow.query.get_or_404(borrow_id)
@@ -411,7 +416,7 @@ def all_borrows():
         max_prolongs=current_app.config["MAX_PROLONG_TIMES"]
     )
 
-@moderate.route("/delete-user/<int:user_id>", methods=("GET", "POST"))
+@moderate.route("/delete-user/<int:user_id>", methods=("GET",))
 @admin_required
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
@@ -419,3 +424,21 @@ def delete_user(user_id):
     db.session.commit()
     flash("Pomyślnie usunięto użytkownika.", "success")
     return redirect(url_for("moderate.list_users"))
+
+@moderate.route("/delete-book/<int:book_id>", methods=("GET",))
+@admin_required
+def delete_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    db.session.delete(book)
+    db.session.commit()
+    flash("Poprawnie usunięto książkę.", "success")
+    return redirect(url_for("main.search"))
+
+@moderate.route("/delete-borrow/<int:borrow_id>", methods=("GET",))
+@admin_required
+def delete_borrow(borrow_id):
+    borrow = Borrow.query.get_or_404(borrow_id)
+    db.session.delete(borrow)
+    db.session.commit()
+    flash("Poprawnie usunięto wypożyczenie.", "success")
+    return redirect(request.referrer or url_for("moderate.all_borrows"))
