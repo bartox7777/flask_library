@@ -32,6 +32,8 @@ from ..auth.decorators import moderator_required
 from ..auth.decorators import admin_required
 
 
+# ADDING
+
 @moderate.route("/add-book", methods=("GET", "POST"))
 @moderator_required
 def add_book():
@@ -91,6 +93,62 @@ def add_book():
         button_value="Dodaj książkę"
     )
 
+@moderate.route("/add-user", methods=("GET", "POST"))
+@moderator_required
+def add_user():
+    form = UserForm(request.form)
+    form.role.choices = [(role.id, role.name) for role in Role.query.all()]
+    if form.validate_on_submit():
+        error = False
+        if User.query.filter_by(email=form.email.data).first():
+            form.email.errors.append("Ten email jest już przypisany.")
+            error = True
+        if PersonalData.query.filter_by(phone_number=form.phone_number.data).first():
+            form.phone_number.errors.append("Ten numer telefonu jest już przypisany.")
+            error = True
+
+        if not error:
+            password = "".join(random.choices(string.ascii_letters+string.digits, k=8))
+
+            new_user = User(
+                email=form.email.data,
+                role_id=form.role.data,
+                password=password,
+            )
+            db.session.add(new_user)
+            db.session.commit()
+
+            new_user_personal_data = PersonalData(
+                name=form.name.data,
+                surname=form.surname.data,
+                phone_number=form.phone_number.data,
+                extended_city=form.extended_city.data,
+                extended_street=form.extended_street.data,
+                user_id=new_user.id
+            )
+            db.session.add(new_user_personal_data)
+            db.session.commit()
+
+            print(f"EMAIL TO: {new_user.email}\nPASSWORD: {password}")
+            flash(f"Użytkownik { new_user.full_name } dodany pomyślnie.", "success")
+            flash(f"Hasło zostało wysłane na podanego e-maila.", "info")
+            return redirect(url_for("moderate.edit_user", user_id=new_user.id))
+
+    role_user_id = Role.query.filter_by(name="user").first().id
+    form.role.data = str(role_user_id)
+    form.activated.render_kw = {"disabled": True}
+
+    return render_template(
+        "moderate/user_form.html",
+        title="Dodaj użytkownika",
+        form=form,
+        dont_show_search_bar=True,
+        heading="Dodaj nowego użytkownika",
+        button_value="Dodaj użytkownika"
+    )
+
+# EDITING
+
 @moderate.route("/edit-book/<int:book_id>", methods=("GET", "POST"))
 @moderator_required
 def edit_book(book_id):
@@ -134,6 +192,43 @@ def edit_book(book_id):
         book=book
     )
 
+@moderate.route("/edit-user/<int:user_id>", methods=("GET", "POST"))
+@moderator_required
+def edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    form = UserForm(request.form, obj=user.personal_data[0])
+    form.role.choices = [(role.id, role.name) for role in Role.query.filter_by()]
+
+    if form.validate_on_submit():
+        user.personal_data[0].name = form.name.data
+        user.personal_data[0].surname = form.surname.data
+        user.personal_data[0].phone_number = form.phone_number.data
+        user.personal_data[0].extended_city = form.extended_city.data
+        user.personal_data[0].extended_street = form.extended_street.data
+        user.email = form.email.data
+        user.role_id = form.role.data
+        user.activated = form.activated.data
+        db.session.commit()
+        flash("Pomyślnie zedytowano dane.", "success")
+        return redirect(url_for("moderate.edit_user", user_id=user.id))
+
+    form.email.data = user.email
+    form.activated.data = user.activated
+    form.role.data = str(user.role_id)
+
+    return render_template(
+        "moderate/user_form.html",
+        title="Edytuj użytkownika",
+        form=form,
+        dont_show_search_bar=True,
+        heading="Edytuj dane użytkownika",
+        button_value="Edytuj użytkownika",
+        user=user
+    )
+
+# ACTIONS
+
 @moderate.route("/borrow-book/<int:book_id>", methods=("GET", "POST"))
 @moderator_required
 def borrow_book(book_id):
@@ -171,6 +266,61 @@ def borrow_book(book_id):
         button_value="Wypożycz książkę",
         book=book
     )
+
+@moderate.route("/return-book/<int:borrow_id>", methods=("GET",))
+@moderator_required
+def return_book(borrow_id):
+    borrow = Borrow.query.get_or_404(borrow_id)
+    if borrow.return_date:
+        flash("Ta książka została już zwrócona.", "danger")
+        return redirect(request.referrer or url_for("moderate.list_borrows_books", user_id=borrow.user_id))
+    borrow.return_date = datetime.datetime.now()
+    db.session.commit()
+    flash("Zwrot książki przebiegł pomyślnie.", "success")
+    return redirect(request.referrer or url_for("moderate.list_borrows_books", user_id=borrow.user_id))
+
+@moderate.route("/prolong_borrow/<int:borrow_id>", methods=("GET",))
+@moderator_required
+def prolong_borrow(borrow_id):
+    borrow = Borrow.query.get_or_404(borrow_id)
+    max_prolong = current_app.config["MAX_PROLONG_TIMES"]
+    if borrow.prolong_times >= max_prolong:
+        flash(f"Wykorzystano maksymalną liczbę przedłużeń ({max_prolong}).", "danger")
+    else:
+        borrow.predicted_return_date += datetime.timedelta(days=current_app.config["PROLONG_DAYS"])
+        borrow.prolong_times += 1
+        db.session.commit()
+        flash(f"Pomyślnie przedłużono wypożyczenie.", "success")
+
+    return redirect(request.referrer or url_for("moderate.list_borrows_books", user_id=borrow.user_id))
+
+def delete_object(object_id, model):
+    obj = model.query.get_or_404(object_id)
+    db.session.delete(obj)
+    db.session.commit()
+
+@moderate.route("/delete-user/<int:user_id>", methods=("GET",))
+@admin_required
+def delete_user(user_id):
+    delete_object(user_id, User)
+    flash("Pomyślnie usunięto użytkownika.", "success")
+    return redirect(url_for("moderate.list_users"))
+
+@moderate.route("/delete-book/<int:book_id>", methods=("GET",))
+@admin_required
+def delete_book(book_id):
+    delete_object(book_id, Book)
+    flash("Poprawnie usunięto książkę.", "success")
+    return redirect(url_for("main.search"))
+
+@moderate.route("/delete-borrow/<int:borrow_id>", methods=("GET",))
+@admin_required
+def delete_borrow(borrow_id):
+    delete_object(borrow_id, Borrow)
+    flash("Poprawnie usunięto wypożyczenie.", "success")
+    return redirect(request.referrer or url_for("moderate.all_borrows"))
+
+# LISTING
 
 @moderate.route("/list-users", methods=("GET", "POST"))
 @moderator_required
@@ -255,122 +405,6 @@ def list_borrows_books():
         max_prolongs=current_app.config["MAX_PROLONG_TIMES"]
     )
 
-@moderate.route("/return-book/<int:borrow_id>", methods=("GET",))
-@moderator_required
-def return_book(borrow_id):
-    borrow = Borrow.query.get_or_404(borrow_id)
-    if borrow.return_date:
-        flash("Ta książka została już zwrócona.", "danger")
-        return redirect(request.referrer or url_for("moderate.list_borrows_books", user_id=borrow.user_id))
-    borrow.return_date = datetime.datetime.now()
-    db.session.commit()
-    flash("Zwrot książki przebiegł pomyślnie.", "success")
-    return redirect(request.referrer or url_for("moderate.list_borrows_books", user_id=borrow.user_id))
-
-@moderate.route("/edit-user/<int:user_id>", methods=("GET", "POST"))
-@moderator_required
-def edit_user(user_id):
-    user = User.query.get_or_404(user_id)
-
-    form = UserForm(request.form, obj=user.personal_data[0])
-    form.role.choices = [(role.id, role.name) for role in Role.query.filter_by()]
-
-    if form.validate_on_submit():
-        user.personal_data[0].name = form.name.data
-        user.personal_data[0].surname = form.surname.data
-        user.personal_data[0].phone_number = form.phone_number.data
-        user.personal_data[0].extended_city = form.extended_city.data
-        user.personal_data[0].extended_street = form.extended_street.data
-        user.email = form.email.data
-        user.role_id = form.role.data
-        user.activated = form.activated.data
-        db.session.commit()
-        flash("Pomyślnie zedytowano dane.", "success")
-        return redirect(url_for("moderate.edit_user", user_id=user.id))
-
-    form.email.data = user.email
-    form.activated.data = user.activated
-    form.role.data = str(user.role_id)
-
-    return render_template(
-        "moderate/user_form.html",
-        title="Edytuj użytkownika",
-        form=form,
-        dont_show_search_bar=True,
-        heading="Edytuj dane użytkownika",
-        button_value="Edytuj użytkownika",
-        user=user
-    )
-
-@moderate.route("/add-user", methods=("GET", "POST"))
-@moderator_required
-def add_user():
-    form = UserForm(request.form)
-    form.role.choices = [(role.id, role.name) for role in Role.query.all()]
-    if form.validate_on_submit():
-        error = False
-        if User.query.filter_by(email=form.email.data).first():
-            form.email.errors.append("Ten email jest już przypisany.")
-            error = True
-        if PersonalData.query.filter_by(phone_number=form.phone_number.data).first():
-            form.phone_number.errors.append("Ten numer telefonu jest już przypisany.")
-            error = True
-
-        if not error:
-            password = "".join(random.choices(string.ascii_letters+string.digits, k=8))
-
-            new_user = User(
-                email=form.email.data,
-                role_id=form.role.data,
-                password=password,
-            )
-            db.session.add(new_user)
-            db.session.commit()
-
-            new_user_personal_data = PersonalData(
-                name=form.name.data,
-                surname=form.surname.data,
-                phone_number=form.phone_number.data,
-                extended_city=form.extended_city.data,
-                extended_street=form.extended_street.data,
-                user_id=new_user.id
-            )
-            db.session.add(new_user_personal_data)
-            db.session.commit()
-
-            print(f"EMAIL TO: {new_user.email}\nPASSWORD: {password}")
-            flash(f"Użytkownik { new_user.full_name } dodany pomyślnie.", "success")
-            flash(f"Hasło zostało wysłane na podanego e-maila.", "info")
-            return redirect(url_for("moderate.edit_user", user_id=new_user.id))
-
-    role_user_id = Role.query.filter_by(name="user").first().id
-    form.role.data = str(role_user_id)
-    form.activated.render_kw = {"disabled": True}
-
-    return render_template(
-        "moderate/user_form.html",
-        title="Dodaj użytkownika",
-        form=form,
-        dont_show_search_bar=True,
-        heading="Dodaj nowego użytkownika",
-        button_value="Dodaj użytkownika"
-    )
-
-@moderate.route("/prolong_borrow/<int:borrow_id>", methods=("GET",))
-@moderator_required
-def prolong_borrow(borrow_id):
-    borrow = Borrow.query.get_or_404(borrow_id)
-    max_prolong = current_app.config["MAX_PROLONG_TIMES"]
-    if borrow.prolong_times >= max_prolong:
-        flash(f"Wykorzystano maksymalną liczbę przedłużeń ({max_prolong}).", "danger")
-    else:
-        borrow.predicted_return_date += datetime.timedelta(days=current_app.config["PROLONG_DAYS"])
-        borrow.prolong_times += 1
-        db.session.commit()
-        flash(f"Pomyślnie przedłużono wypożyczenie.", "success")
-
-    return redirect(request.referrer or url_for("moderate.list_borrows_books", user_id=borrow.user_id))
-
 @moderate.route("/list-borrows-users")
 @moderator_required
 def list_borrows_users():
@@ -415,30 +449,3 @@ def all_borrows():
         datetime_now=datetime.datetime.now(),
         max_prolongs=current_app.config["MAX_PROLONG_TIMES"]
     )
-
-@moderate.route("/delete-user/<int:user_id>", methods=("GET",))
-@admin_required
-def delete_user(user_id):
-    user = User.query.get_or_404(user_id)
-    db.session.delete(user)
-    db.session.commit()
-    flash("Pomyślnie usunięto użytkownika.", "success")
-    return redirect(url_for("moderate.list_users"))
-
-@moderate.route("/delete-book/<int:book_id>", methods=("GET",))
-@admin_required
-def delete_book(book_id):
-    book = Book.query.get_or_404(book_id)
-    db.session.delete(book)
-    db.session.commit()
-    flash("Poprawnie usunięto książkę.", "success")
-    return redirect(url_for("main.search"))
-
-@moderate.route("/delete-borrow/<int:borrow_id>", methods=("GET",))
-@admin_required
-def delete_borrow(borrow_id):
-    borrow = Borrow.query.get_or_404(borrow_id)
-    db.session.delete(borrow)
-    db.session.commit()
-    flash("Poprawnie usunięto wypożyczenie.", "success")
-    return redirect(request.referrer or url_for("moderate.all_borrows"))
