@@ -32,13 +32,15 @@
         </div>
     </div>
 
-    <script>
-        btn = document.querySelector("#delete-user");
-        btn.addEventListener("click", function(event){
-            event.preventDefault();
-            if (confirm("Czy na pewno chcesz usunąć użytkownika {{ user.full_name }}?\n\nUsunięte zostaną dane personalne oraz wypożyczenia użytkownika.")){
-                location.href = "{{ url_for('moderate.delete_user', user_id=user.id) }}";
-            }
-        })
-    </script>
+    {% if user%}
+        <script>
+            btn = document.querySelector("#delete-user");
+            btn.addEventListener("click", function(event){
+                event.preventDefault();
+                if (confirm("Czy na pewno chcesz usunąć użytkownika {{ user.full_name }}?\n\nUsunięte zostaną dane personalne oraz wypożyczenia użytkownika.")){
+                    location.href = "{{ url_for('moderate.delete_user', user_id=user.id) }}";
+                }
+            })
+        </script>
+    {% endif %}
 {% endblock content %}

@@ -5,6 +5,7 @@ from flask_login import LoginManager
 from flask_login import AnonymousUserMixin
 from flask_babel import Babel
 from flask_migrate import Migrate
+from flask_mail import Mail
 
 from config import config
 
@@ -13,6 +14,7 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 babel = Babel()
 migrate = Migrate()
+mail = Mail()
 
 # is it good solution?
 class AnonymousUser(AnonymousUserMixin):
@@ -35,6 +37,7 @@ def create_app(config_name="production"):
     login_manager.init_app(app)
     babel.init_app(app)
     migrate.init_app(app, db)
+    mail.init_app(app)
 
     from . import models
     @login_manager.user_loader

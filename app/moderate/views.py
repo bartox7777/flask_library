@@ -15,12 +15,14 @@ from isbnlib import meta
 from isbnlib import is_isbn10
 from isbnlib import is_isbn13
 from sqlalchemy import or_
+from flask_mail import Message
 
 from .forms import BookForm
 from .forms import UserForm
 from .forms import SearchUserForm
 from .forms import BorrowBookForm
 from . import moderate
+from .. import mail
 from .. import db
 
 from ..models import Book, PersonalData
@@ -129,7 +131,14 @@ def add_user():
             db.session.add(new_user_personal_data)
             db.session.commit()
 
-            print(f"EMAIL TO: {new_user.email}\nPASSWORD: {password}")
+            # print(f"EMAIL TO: {new_user.email}\nPASSWORD: {password}")
+            # BUG
+            # message = Message(
+            #     subject = "[LIBsys] - hasło do konta",
+            #     recipients=[new_user.email],
+            #     body="xd"
+            # )
+            # mail.send(message)
             flash(f"Użytkownik { new_user.full_name } dodany pomyślnie.", "success")
             flash(f"Hasło zostało wysłane na podanego e-maila.", "info")
             return redirect(url_for("moderate.edit_user", user_id=new_user.id))
