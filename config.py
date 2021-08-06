@@ -15,6 +15,13 @@ class Config:
     PROLONG_DAYS = 14
     MAX_CONTENT_LENGTH = 16 * 1000 * 1000  # 16 MB
 
+    MAIL_SERVER = str(os.environ.get("MAIL_SERVER"))
+    MAIL_PORT = int(os.environ.get("MAIL_PORT"))
+    MAIL_USE_TLS = bool(int(os.environ.get("MAIL_USE_TLS")) or False)
+    MAIL_USE_SSL = bool(os.environ.get("MAIL_USE_SSL") or True)
+    MAIL_USERNAME = str(os.environ.get("MAIL_USERNAME"))
+    MAIL_PASSWORD = str(os.environ.get("MAIL_PASSWORD"))
+    MAIL_DEFAULT_SENDER = str(os.environ.get("MAIL_DEFAULT_SENDER") or os.environ.get("MAIL_USERNAME"))
 
     # @staticmethod
     # def init_app(app):
@@ -27,18 +34,10 @@ class Config:
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI") or \
         "sqlite:///" + os.path.join(basedir, "data.sqlite")
-    # MAIL_SERVER = str()
-    # MAIL_PORT = int()
-    # MAIL_USE_TLS = bool()
-    # MAIL_USE_SSL = bool()
-    # MAIL_USERNAME = str()
-    # MAIL_PASSWORD = str()
-    # MAIL_DEFAULT_SENDER = str()
 
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    MAIL_DEFAULT_SENDER = "fake@mail.pl"
     SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI") or \
         "sqlite:///" + os.path.join(basedir, "data-dev.sqlite")
     # SQLALCHEMY_ECHO = True

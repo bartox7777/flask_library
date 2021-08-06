@@ -1,18 +1,27 @@
 from flask import request
+from flask import flash
 from flask import current_app
 from flask import render_template
 
 import io
 from PIL import Image
 from base64 import b64encode
+from flask.helpers import url_for
 from sqlalchemy import or_
+from flask_login import current_user
+from werkzeug.utils import redirect
 
 from . import main
 from .forms import SearchForm
 from ..models import Book
 from ..models import Author
-from ..models import Borrow
 
+
+@main.before_request
+def check_if_activated():
+    if current_user.is_authenticated and not current_user.activated:
+        flash("Aktywuj swoje konto przez zmianę hasła.", "warning")
+        return redirect(url_for("auth.change_password"))
 
 def process_covers(books, width=200, height=300, class_="img-thumbnail p-1 m-2"):
     processed_covers = []

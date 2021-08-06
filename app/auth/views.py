@@ -64,6 +64,7 @@ def change_password():
 
     if form.validate_on_submit():
         current_user.password = form.password.data
+        current_user.activated = True
         db.session.commit()
         flash("Zmiana hasła przebiegła pomyślnie.", "success")
 

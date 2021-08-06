@@ -131,14 +131,12 @@ def add_user():
             db.session.add(new_user_personal_data)
             db.session.commit()
 
-            # print(f"EMAIL TO: {new_user.email}\nPASSWORD: {password}")
-            # BUG
-            # message = Message(
-            #     subject = "[LIBsys] - hasło do konta",
-            #     recipients=[new_user.email],
-            #     body="xd"
-            # )
-            # mail.send(message)
+            message = Message(
+                subject = "[LIBsys] - hasło do konta",
+                recipients=[new_user.email],
+                html=render_template("email/password.html", user=new_user, password=password)
+            )
+            mail.send(message)
             flash(f"Użytkownik { new_user.full_name } dodany pomyślnie.", "success")
             flash(f"Hasło zostało wysłane na podanego e-maila.", "info")
             return redirect(url_for("moderate.edit_user", user_id=new_user.id))
