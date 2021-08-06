@@ -15,13 +15,16 @@ class Config:
     PROLONG_DAYS = 14
     MAX_CONTENT_LENGTH = 16 * 1000 * 1000  # 16 MB
 
-    MAIL_SERVER = str(os.environ.get("MAIL_SERVER"))
-    MAIL_PORT = int(os.environ.get("MAIL_PORT"))
-    MAIL_USE_TLS = bool(int(os.environ.get("MAIL_USE_TLS")) or False)
-    MAIL_USE_SSL = bool(os.environ.get("MAIL_USE_SSL") or True)
-    MAIL_USERNAME = str(os.environ.get("MAIL_USERNAME"))
-    MAIL_PASSWORD = str(os.environ.get("MAIL_PASSWORD"))
-    MAIL_DEFAULT_SENDER = str(os.environ.get("MAIL_DEFAULT_SENDER") or os.environ.get("MAIL_USERNAME"))
+    try:
+        MAIL_SERVER = str(os.environ.get("MAIL_SERVER"))
+        MAIL_PORT = int(os.environ.get("MAIL_PORT"))
+        MAIL_USE_TLS = bool(int(os.environ.get("MAIL_USE_TLS")) or False)
+        MAIL_USE_SSL = bool(os.environ.get("MAIL_USE_SSL") or True)
+        MAIL_USERNAME = str(os.environ.get("MAIL_USERNAME"))
+        MAIL_PASSWORD = str(os.environ.get("MAIL_PASSWORD"))
+        MAIL_DEFAULT_SENDER = str(os.environ.get("MAIL_DEFAULT_SENDER") or os.environ.get("MAIL_USERNAME"))
+    except:
+        raise Exception("Not properly set email settings.")
 
     # @staticmethod
     # def init_app(app):
