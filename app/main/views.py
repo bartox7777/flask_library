@@ -4,17 +4,20 @@ from flask import current_app
 from flask import render_template
 
 import io
+import datetime
 from PIL import Image
 from base64 import b64encode
 from flask.helpers import url_for
 from sqlalchemy import or_
 from flask_login import current_user
+from flask_login import login_required
 from werkzeug.utils import redirect
 
 from . import main
 from .forms import SearchForm
 from ..models import Book
 from ..models import Author
+from ..models import Borrow
 
 
 @main.before_request
@@ -131,4 +134,24 @@ def book_details(book_id):
         form=SearchForm(),
         cover=cover,
         available_copies=available_copies
+    )
+
+@login_required
+@main.route("/borrowed-books", methods=("GET", "POST"))
+def borrowed_books():
+    page = request.args.get("page", 1, int)
+    borrows = Borrow.query \
+        .filter_by(user_id=current_user.id) \
+        .order_by(Borrow.return_date.desc().nullsfirst()) \
+        .paginate(page, current_app.config["BOOKS_PER_PAGE"])
+
+    return render_template(
+        "main/list_borrows_books.html",
+        title="Moje wypożyczenia",
+        heading = "Wszystkie moje wypożyczenia",
+        pagination=borrows,
+        borrowed_books=borrows.items,
+        dont_show_search_bar=True,
+        datetime_now=datetime.datetime.now(),
+        max_prolongs=current_app.config["MAX_PROLONG_TIMES"]
     )

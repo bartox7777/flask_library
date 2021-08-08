@@ -5,6 +5,7 @@ from flask import request
 from flask import redirect
 from flask import render_template
 
+import datetime
 from flask_login import login_user
 from flask_login import logout_user
 from flask_login import current_user
@@ -14,6 +15,7 @@ from flask_login import fresh_login_required
 from app import db
 from . import auth
 from ..models import User
+from ..models import Borrow
 from .forms import LoginForm
 from .forms import ChangePasswordForm
 
@@ -34,6 +36,14 @@ def login():
             personal_data = user.personal_data[0]
             name, surname = personal_data.name, personal_data.surname
             flash(f"Użytkownik {name} {surname} zalogowany pomyślnie.", "success")
+
+            delayed_borrows = Borrow.query.filter(
+                Borrow.return_date is None,
+                Borrow.predicted_return_date <= datetime.datetime.now()
+            ).count()
+
+            if delayed_borrows > 0:
+                flash("Czas na zwrot niektórych książek.", "warning")
 
             next = request.args.get("next") # HACK: is next always safe?
 

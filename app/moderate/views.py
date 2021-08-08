@@ -287,7 +287,6 @@ def return_book(borrow_id):
     return redirect(request.referrer or url_for("moderate.list_borrows_books", user_id=borrow.user_id))
 
 @moderate.route("/prolong_borrow/<int:borrow_id>", methods=("GET",))
-@moderator_required
 def prolong_borrow(borrow_id):
     borrow = Borrow.query.get_or_404(borrow_id)
     max_prolong = current_app.config["MAX_PROLONG_TIMES"]
