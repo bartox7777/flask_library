@@ -136,8 +136,8 @@ def book_details(book_id):
         available_copies=available_copies
     )
 
-@login_required
 @main.route("/borrowed-books", methods=("GET", "POST"))
+@login_required
 def borrowed_books():
     page = request.args.get("page", 1, int)
     borrows = Borrow.query \

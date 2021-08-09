@@ -1,3 +1,4 @@
+import re
 import unittest
 import random
 
@@ -7,7 +8,7 @@ from flask_login import current_user
 
 from app import create_app
 from app import login_manager
-from app.models import Book
+from app.models import Book, Borrow
 
 class ClientTestCase(unittest.TestCase):
     def setUp(self):
@@ -138,3 +139,19 @@ class ClientTestCase(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue('title="Wypożycz"' in response.get_data(as_text=True))
             self.assertTrue('title="Edytuj"' in response.get_data(as_text=True))
+
+    def test_borrowed_books(self):
+        with self.client as client:
+            response = client.get("/borrowed-books")
+            self.assertEqual(response.status_code, 302)
+
+            client.post("/login", data=dict(
+                email="test@test.user",
+                password="test"),
+                follow_redirects=True)
+            response = client.get("/borrowed-books")
+            self.assertEqual(response.status_code, 200)
+            borrow = Borrow.query.filter_by(user_id=current_user.id).first()
+            self.assertTrue(borrow.book.title in response.get_data(as_text=True))
+            self.assertTrue(borrow.book.isbn in response.get_data(as_text=True))
+            self.assertTrue('title="Prolonguj wypożyczenie"' in response.get_data(as_text=True))
