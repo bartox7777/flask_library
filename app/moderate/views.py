@@ -16,6 +16,7 @@ from isbnlib import is_isbn10
 from isbnlib import is_isbn13
 from sqlalchemy import or_
 from flask_mail import Message
+from flask_login import current_user
 
 from .forms import BookForm
 from .forms import UserForm
@@ -25,11 +26,13 @@ from . import moderate
 from .. import mail
 from .. import db
 
-from ..models import Book, PersonalData
+from ..models import Book
+from ..models import PersonalData
 from ..models import User
 from ..models import Author
 from ..models import Borrow
 from ..models import Role
+from ..models import Permission
 from ..auth.decorators import moderator_required
 from ..auth.decorators import admin_required
 
@@ -208,6 +211,27 @@ def edit_user(user_id):
     form.role.choices = [(role.id, role.name) for role in Role.query.filter_by()]
 
     if form.validate_on_submit():
+        error = False
+        user_by_email = User.query.filter_by(email=form.email.data).first()
+        personal_data_by_number = PersonalData.query.filter_by(phone_number=form.phone_number.data).first()
+        if user_by_email and user_by_email is not user:
+            form.email.errors.append("Ten email jest już przypisany.")
+            error = True
+        if personal_data_by_number and personal_data_by_number is not user.personal_data[0]:
+            form.phone_number.errors.append("Ten numer telefonu jest już przypisany.")
+            error = True
+
+        if error:
+            return render_template(
+                "moderate/user_form.html",
+                title="Edytuj użytkownika",
+                form=form,
+                dont_show_search_bar=True,
+                heading="Edytuj dane użytkownika",
+                button_value="Edytuj użytkownika",
+                user=user
+            )
+
         user.personal_data[0].name = form.name.data
         user.personal_data[0].surname = form.surname.data
         user.personal_data[0].phone_number = form.phone_number.data
@@ -286,9 +310,12 @@ def return_book(borrow_id):
     flash("Zwrot książki przebiegł pomyślnie.", "success")
     return redirect(request.referrer or url_for("moderate.list_borrows_books", user_id=borrow.user_id))
 
-@moderate.route("/prolong_borrow/<int:borrow_id>", methods=("GET",))
+@moderate.route("/prolong-borrow/<int:borrow_id>", methods=("GET",))
 def prolong_borrow(borrow_id):
     borrow = Borrow.query.get_or_404(borrow_id)
+    if not current_user.can(Permission.MODERATOR):
+        if borrow.user_id != current_user.id:
+            abort(403)
     max_prolong = current_app.config["MAX_PROLONG_TIMES"]
     if borrow.prolong_times >= max_prolong:
         flash(f"Wykorzystano maksymalną liczbę przedłużeń ({max_prolong}).", "danger")

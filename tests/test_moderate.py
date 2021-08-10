@@ -1,13 +1,17 @@
+from flask import current_app
+
 import unittest
 from faker import Faker
 from random import choice
-
-from flask import current_app
+from flask_login import current_user
 
 from app import create_app
 from app.models import Author
 from app.models import User
 from app.models import Book
+from app.models import Role
+from app.models import Borrow
+
 
 class ModerateTestCase(unittest.TestCase):
     def setUp(self):
@@ -181,3 +185,146 @@ class ModerateTestCase(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue("Brak dostępnych kopii do wypożyczenia" in response.get_data(as_text=True))
             self.assertTrue(f"0 / {random_book.number_of_copies}" in response.get_data(as_text=True))
+
+    def test_add_user(self):
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.user",
+                password="test"),
+                follow_redirects=True)
+            response = client.get("/add-user")
+            self.assertEqual(response.status_code, 403)
+            client.get("/logout", follow_redirects=True)
+
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.moderator",
+                password="test"),
+                follow_redirects=True)
+            response = client.post("/add-user", data=dict(
+                name="test",
+                surname="test",
+                phone_number="123123123",
+                extended_city="poznan",
+                extended_street="dabrowskiego",
+                email="test@test.user",
+                role=Role.query.filter_by(name="user").first().id
+            ))
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("Ten email jest już przypisany." in response.get_data(as_text=True))
+
+            response = client.post("/add-user", data=dict(
+                name="test",
+                surname="test",
+                phone_number="123123123",
+                extended_city="poznan",
+                extended_street="dabrowskiego",
+                email="test@test.newuser",
+                role=Role.query.filter_by(name="user").first().id
+            ), follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("Użytkownik test test dodany pomyślnie." in response.get_data(as_text=True))
+            self.assertTrue(User.query.filter_by(email="test@test.newuser").first())
+            client.get("/logout", follow_redirects=True)
+
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.admin",
+                password="test"),
+                follow_redirects=True)
+
+            response = client.post("/add-user", data=dict(
+                name="test",
+                surname="test",
+                phone_number="321321321",
+                extended_city="ec",
+                extended_street="es",
+                email="test@test.neweruser",
+                role=Role.query.filter_by(name="user").first().id
+            ), follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("Użytkownik test test dodany pomyślnie." in response.get_data(as_text=True))
+            self.assertTrue(User.query.filter_by(email="test@test.neweruser").first())
+            client.get("/logout", follow_redirects=True)
+
+    def test_edit_user(self):
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.user",
+                password="test"),
+                follow_redirects=True)
+            response = client.get(f"/edit-user/{current_user.id}")
+            self.assertEqual(response.status_code, 403)
+            client.get("/logout", follow_redirects=True)
+
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.moderator",
+                password="test"),
+                follow_redirects=True)
+
+            user = User.query.filter_by(email="test@test.user").first()
+            response = client.get(f"/edit-user/{user.id}")
+            self.assertTrue(user.personal_data[0].name in response.get_data(as_text=True))
+            self.assertTrue(user.personal_data[0].surname in response.get_data(as_text=True))
+            self.assertTrue(user.personal_data[0].phone_number in response.get_data(as_text=True))
+            self.assertTrue(user.personal_data[0].extended_city in response.get_data(as_text=True))
+            self.assertTrue(user.personal_data[0].extended_street in response.get_data(as_text=True))
+            self.assertTrue(user.email in response.get_data(as_text=True))
+
+            response = client.post(f"/edit-user/{user.id}", data=dict(
+                name="test",
+                surname="testing",
+                phone_number=user.personal_data[0].phone_number,
+                extended_city="ec",
+                extended_street="es",
+                email=user.email,
+                activated=True,
+                role=user.role_id
+            ), follow_redirects=True)
+
+            self.assertEqual(user.full_name, "test testing")
+
+    def test_prolong_borrow(self):
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.moderator",
+                password="test"),
+                follow_redirects=True)
+
+            borrow = Borrow.query.first()
+
+            response = client.get(f"/prolong-borrow/{borrow.id}", follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("Pomyślnie przedłużono wypożyczenie." in response.get_data(as_text=True))
+
+            response = client.get(f"/prolong-borrow/{borrow.id}", follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("Wykorzystano maksymalną liczbę przedłużeń" in response.get_data(as_text=True))
+
+    def test_return_book(self):
+        borrow = Borrow.query.first()
+
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.user",
+                password="test"),
+                follow_redirects=True)
+            response = client.get(f"/return-book/{borrow.id}")
+            self.assertEqual(response.status_code, 403)
+            client.get("/logout")
+
+        with self.client as client:
+            response = client.post("/login", data=dict(
+                email="test@test.moderator",
+                password="test"),
+                follow_redirects=True)
+            self.assertIsNone(borrow.return_date)
+            response = client.get(f"/return-book/{borrow.id}", follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("Zwrot książki przebiegł pomyślnie." in response.get_data(as_text=True))
+            self.assertIsNotNone(borrow.return_date)
+
+            response = client.get(f"/return-book/{borrow.id}", follow_redirects=True)
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue("Ta książka została już zwrócona." in response.get_data(as_text=True))

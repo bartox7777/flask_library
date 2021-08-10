@@ -1,4 +1,3 @@
-import re
 import unittest
 import random
 
@@ -155,3 +154,15 @@ class ClientTestCase(unittest.TestCase):
             self.assertTrue(borrow.book.title in response.get_data(as_text=True))
             self.assertTrue(borrow.book.isbn in response.get_data(as_text=True))
             self.assertTrue('title="Prolonguj wypożyczenie"' in response.get_data(as_text=True))
+
+    def test_user_prolong(self):
+        with self.client as client:
+            client.post("/login", data=dict(
+                email="test@test.user",
+                password="test"),
+                follow_redirects=True)
+            borrow = Borrow.query.filter_by(user_id=current_user.id).first()
+            self.assertEqual(borrow.prolong_times, 0)
+            response = client.get(f"/prolong-borrow/{borrow.id}")
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(borrow.prolong_times, 1)
