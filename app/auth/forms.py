@@ -17,5 +17,5 @@ class LoginForm(FlaskForm):
 
 class ChangePasswordForm(FlaskForm):
     password = PasswordField("Nowe hasło", validators=[DataRequired()])
-    repeated_password = PasswordField("Powtórz nowe hasło", validators=[DataRequired(), EqualTo("password", "Hasła nie są te same.")])
+    repeated_password = PasswordField("Powtórz nowe hasło", validators=[DataRequired(), EqualTo("password", "Hasła nie są takie same.")])
     submit = SubmitField("Zmień hasło")

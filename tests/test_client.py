@@ -77,6 +77,23 @@ class ClientTestCase(unittest.TestCase):
             self.assertTrue(full_name in response.get_data(as_text=True))
             self.assertTrue(b"Wyloguj" in response.get_data())
 
+            password = current_user.password_hash
+
+            response = client.post("/change-password", data=dict(
+                password="testing",
+                repeated_password="testingX"
+            ), follow_redirects=True)
+            self.assertTrue("Hasła nie są takie same." in response.get_data(as_text=True))
+            self.assertTrue(current_user.password_hash == password)
+
+            response = client.post("/change-password", data=dict(
+                password="testing",
+                repeated_password="testing"
+            ), follow_redirects=True)
+            self.assertTrue("Zmiana hasła przebiegła pomyślnie." in response.get_data(as_text=True))
+            self.assertTrue(current_user.password_hash != password)
+
+
             response = client.get("/logout", follow_redirects=True)
             self.assertEqual(response.status_code, 200)
             self.assertTrue("Pomyślnie wylogowano." in response.get_data(as_text=True))
