@@ -1,5 +1,3 @@
-http://libsys.tk/
-
 # flask_library
 Lite library system as website in Flask.
 
