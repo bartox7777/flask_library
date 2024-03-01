@@ -5,6 +5,7 @@ A website that helps you manage your library. By taking care of storing data abo
 Clients can also register and get informations about availability of books and check out their accounts.
 
 (python 3.10)
+
 (create a virtual environment with python 3.10 and activate it before installing the requirements)
 (you can change TESTING = True in config.py)
 
@@ -38,4 +39,16 @@ Clients can also register and get informations about availability of books and c
    ```bash
     python3 -m flask run
     ```
+## Docker with DEMO
+bartox7777/libsysflaskapp
+
+-*-
+
+ADMIN (mail | password): test@test.admin | test
+
+MODERATOR (mail | password): test@test.moderator | test
+
+USER (mail | password): test@test.user | test
+
+INACTIVE USER (mail | password): test@test.user-inactive | test
 
