@@ -39,8 +39,6 @@ Clients can also register and get informations about availability of books and c
    ```bash
     python3 -m flask run
     ```
-## Docker with DEMO
-bartox7777/libsysflaskapp
 
 -*-
 
