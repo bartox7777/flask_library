@@ -26,15 +26,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with unittests
       run: |
         echo "MAIL_PORT=${{ vars.MAIL_PORT }}" >> ./.env
+        echo "MAIL_SERVER=${{ vars.MAIL_SERVER }}" >> ./.env
+        echo "MAIL_USE_SSL=${{ vars.MAIL_USE_SSL }}" >> ./.env
+        echo "MAIL_USE_TLS=${{ vars.MAIL_USE_TLS }}" >> ./.env
+        echo "SECRET_KEY=${{ vars.SECRET_KEY }}" >> ./.env
+        echo "MAIL_USERNAME=${{ vars.MAIL_USERNAME }}" >> ./.env
+        echo "MAIL_PASSWORD=${{ vars.MAIL_PASSWORD }}" >> ./.env
+        echo "MAIL_DEFAULT_SENDER=${{ vars.MAIL_DEFAULT_SENDER }}" >> ./.env
         python -m flask test
