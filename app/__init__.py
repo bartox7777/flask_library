@@ -67,8 +67,11 @@ def create_app(config_name="production"):
     from .auth import auth
     from .main import main
     from .moderate import moderate
+    from .api import api
+
     app.register_blueprint(auth)
     app.register_blueprint(main)
     app.register_blueprint(moderate)
+    app.register_blueprint(api)
 
     return app

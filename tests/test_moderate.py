@@ -300,7 +300,7 @@ class ModerateTestCase(unittest.TestCase):
 
             response = client.get(f"/prolong-borrow/{borrow.id}", follow_redirects=True)
             self.assertEqual(response.status_code, 200)
-            self.assertTrue("Wykorzystano maksymalną liczbę przedłużeń" in response.get_data(as_text=True))
+            self.assertTrue("Wykorzystano maksymalną liczbę przedłużeń" in response.get_data(as_text=True))
 
     def test_return_book(self):
         borrow = Borrow.query.first()
