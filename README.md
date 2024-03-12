@@ -33,7 +33,7 @@ Clients can also register and get informations about availability of books and c
 5. Initialize the database and fill it with data
    ```bash
     python3 -m flask init-db
-    python3 -m flask insert_test_data
+    python3 -m flask insert-test-data
     ```
 6. Run the application
    ```bash
