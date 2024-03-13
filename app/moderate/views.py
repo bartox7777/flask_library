@@ -318,7 +318,7 @@ def prolong_borrow(borrow_id):
             abort(403)
     max_prolong = current_app.config["MAX_PROLONG_TIMES"]
     if borrow.prolong_times >= max_prolong:
-        flash(f"Wykorzystano maksymalną liczbę przedłużeń ({max_prolong}).", "danger")
+        flash(f"Wykorzystano maksymalną liczbę przedłużeń ({max_prolong}).", "danger")
     else:
         borrow.predicted_return_date += datetime.timedelta(days=current_app.config["PROLONG_DAYS"])
         borrow.prolong_times += 1
