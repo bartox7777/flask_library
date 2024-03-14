@@ -1,10 +1,11 @@
-from flask import render_template
-from flask import request
-from flask import redirect
-from flask import url_for
 from flask import flash
-from flask import current_app
 from flask import abort
+from flask import request
+from flask import url_for
+from flask import redirect
+from flask import current_app
+from flask import render_template
+from flask import get_flashed_messages
 
 import random
 import string
@@ -18,9 +19,8 @@ from sqlalchemy import or_
 from flask_mail import Message
 from flask_login import current_user
 
-from . import api
-from .. import mail
 from .. import db
+from .. import mail
 
 from ..models import Book
 from ..models import PersonalData
@@ -30,6 +30,9 @@ from ..models import Borrow
 from ..models import Role
 from ..models import Permission
 
+from . import api
+from .main import dict_book
+from .main import process_covers
 from .decorators import moderator_required_api
 from .decorators import admin_required_api
 
@@ -119,4 +122,115 @@ def add_book():
         "categories": categories,
         "authors": authors,
         "publishers": publishers,
+    }
+
+
+@api.route("/add-user", methods=("GET", "PUT"))
+@moderator_required_api
+def add_user():
+    roles = [(role.id, role.name) for role in Role.query.all()]
+    role_user_id = Role.query.filter_by(name="user").first().id
+
+    if request.method == "PUT":
+        error = False
+        if User.query.filter_by(email=request.args.get("email")).first():
+            flash("Ten email jest już przypisany.", "danger")
+            error = True
+        if PersonalData.query.filter_by(
+            phone_number=request.args.get("phone_number")
+        ).first():
+            flash("Ten numer telefonu jest już przypisany.", "danger")
+            error = True
+
+        if not error:
+            password = "".join(
+                random.choices(string.ascii_letters + string.digits, k=8)
+            )
+
+            new_user = User(
+                email=request.args.get("email"),
+                role_id=request.args.get("role"),
+                password=password,
+            )
+            db.session.add(new_user)
+            db.session.commit()
+
+            new_user_personal_data = PersonalData(
+                name=request.args.get("name"),
+                surname=request.args.get("surname"),
+                phone_number=request.args.get("phone_number"),
+                extended_city=request.args.get("extended_city"),
+                extended_street=request.args.get("extended_street"),
+                user_id=new_user.id,
+            )
+            db.session.add(new_user_personal_data)
+            db.session.commit()
+
+            message = Message(
+                subject="[LIBsys] - hasło do konta",
+                recipients=[new_user.email],
+                html=render_template(
+                    "email/password.html", user=new_user, password=password
+                ),
+            )
+            mail.send(message)
+            flash(f"Użytkownik { new_user.full_name } dodany pomyślnie.", "success")
+            flash(f"Hasło zostało wysłane na podanego e-maila.", "info")
+            return {
+                "user_id": new_user.id,
+                "flashes": get_flashed_messages(with_categories=True),
+            }
+
+    return {
+        "roles": roles,
+        "role_user_id": role_user_id,
+        "flashes": get_flashed_messages(with_categories=True),
+    }
+
+
+# EDITING
+
+
+@api.route("/edit-book/<int:book_id>", methods=("GET", "PATCH"))
+@moderator_required_api
+def edit_book(book_id):
+    book = Book.query.get_or_404(book_id)
+
+    if request.method == "PATCH":
+        book.isbn = request.args.get("isbn")
+        book.title = request.args.get("title")
+        book.category = request.args.get("category")
+        book.description = request.args.get("description")
+        book.author_id = request.args.get("author")
+        book.number_of_copies = request.args.get("number_of_copies")
+        book.publisher = request.args.get("publisher")
+        book.pages = request.args.get("pages")
+        book.year = request.args.get("year")
+        cover = (
+            request.files["cover"].stream.read() if request.files.get("cover") else ""
+        )
+        if len(cover) > 0:
+            book.cover = cover
+        db.session.commit()
+
+        flash("Edycja książki przebiegła pomyślnie.", "success")
+        return {
+            "flashes": get_flashed_messages(with_categories=True),
+            "book_id": book.id,
+        }
+
+    authors = [(author.id, author.full_name) for author in Author.query.all()]
+    categories = [
+        category[0] for category in db.session.query(Book.category).distinct().all()
+    ]
+    publishers = [
+        publisher[0] for publisher in db.session.query(Book.publisher).distinct().all()
+    ]
+
+    return {
+        "book": [dict_book(book, cover) for book, cover in process_covers([book])][0],
+        "authors": authors,
+        "categories": categories,
+        "publishers": publishers,
+        "flashes": get_flashed_messages(with_categories=True),
     }

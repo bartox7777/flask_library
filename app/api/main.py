@@ -2,6 +2,7 @@ from flask import flash
 from flask import jsonify
 from flask import request
 from flask import current_app
+from flask import get_flashed_messages
 
 import io
 from PIL import Image
@@ -21,7 +22,7 @@ from app.api.decorators import login_required_api
 def check_if_activated():
     if current_user.is_authenticated and not current_user.activated:
         flash("Aktywuj swoje konto przez zmianę hasła.", "warning")
-        return jsonify({"message": "Aktywuj swoje konto przez zmianę hasła."}), 403
+        return jsonify({"flashes": get_flashed_messages()}), 403
 
 
 def process_covers(books):
