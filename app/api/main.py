@@ -1,32 +1,20 @@
 from flask import flash
-from flask import get_flashed_messages
 from flask import jsonify
 from flask import request
 from flask import current_app
 
-import datetime
-from flask_login import login_user
-from flask_login import logout_user
-
-from app.api.decorators import login_required_api
-
 import io
-import datetime
 from PIL import Image
 from base64 import b64encode
-from flask.helpers import url_for
 from sqlalchemy import or_
-from werkzeug.utils import redirect
 from flask_login import current_user
 
-
 from . import api
-from app import db
-from ..models import User
 from ..models import Borrow
 from ..models import Book
 from ..models import Author
 from ..models import Borrow
+from app.api.decorators import login_required_api
 
 
 @api.before_request
@@ -139,32 +127,17 @@ def book_details(book_id):
     borrows = [borrow for borrow in book.borrows if borrow.return_date is None]
     available_copies = book.number_of_copies - len(borrows)
 
-    return {"borrows": borrows, "available_copies": available_copies}
+    return {"borrows": borrows, "available_copies": available_copies, "cover": cover}
 
 
 @api.route("/borrowed-books", methods=(["GET"]))
 @login_required_api
 def borrowed_books():
-    page = request.args.get("page", 1, int)
-    borrows = (
-        Borrow.query.filter_by(user_id=current_user.id)
-        .order_by(Borrow.return_date.desc().nullsfirst())
-        .paginate(page, current_app.config["BOOKS_PER_PAGE"])
+    borrows = Borrow.query.filter_by(user_id=current_user.id).order_by(
+        Borrow.return_date.desc().nullsfirst()
     )
 
     return {
-        # "pagination": [dict_borrow(borrow) for borrow in borrows],
-        "borrowed_books": [dict_borrow(borrow) for borrow in borrows.items],
+        "borrowed_books": [dict_borrow(borrow) for borrow in borrows],
         "max_prolongs": current_app.config["MAX_PROLONG_TIMES"],
     }
-
-    return render_template(
-        "main/list_borrows_books.html",
-        title="Moje wypożyczenia",
-        heading="Wszystkie moje wypożyczenia",
-        pagination=borrows,
-        borrowed_books=borrows.items,
-        dont_show_search_bar=True,
-        datetime_now=datetime.datetime.now(),
-        max_prolongs=current_app.config["MAX_PROLONG_TIMES"],
-    )
