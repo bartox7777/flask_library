@@ -12,7 +12,9 @@ from werkzeug.security import check_password_hash
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, nullable=False, unique=True)
-    personal_data = db.relationship("PersonalData", backref="user", cascade="all, delete-orphan")
+    personal_data = db.relationship(
+        "PersonalData", backref="user", cascade="all, delete-orphan"
+    )
     password_hash = db.Column(db.String, nullable=False)
     activated = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"))
@@ -35,13 +37,14 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def can(self, permission):
-        if self.role.permissions & permission == permission:
+        if self.role and (self.role.permissions & permission == permission):
             return True
         return False
 
     @property
     def full_name(self):
         return f"{self.personal_data[0].name} {self.personal_data[0].surname}"
+
 
 class PersonalData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -71,7 +74,7 @@ class Role(db.Model):
             anonymous=[],
             user=[Permission.USER],
             moderator=[Permission.USER, Permission.MODERATOR],
-            admin=[Permission.USER, Permission.MODERATOR, Permission.ADMIN]
+            admin=[Permission.USER, Permission.MODERATOR, Permission.ADMIN],
         )
         for name, permissions in roles.items():
             role = Role(name=name, permissions=sum(permissions))

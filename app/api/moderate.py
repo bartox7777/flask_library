@@ -37,6 +37,20 @@ from .decorators import moderator_required_api
 from .decorators import admin_required_api
 
 
+def dict_user(user):
+    return {
+        "id": user.id,
+        "email": user.email,
+        "role": user.role.name if user.role else None,
+        "activated": user.activated,
+        "name": user.personal_data[0].name,
+        "surname": user.personal_data[0].surname,
+        "phone_number": user.personal_data[0].phone_number,
+        "extended_city": user.personal_data[0].extended_city,
+        "extended_street": user.personal_data[0].extended_street,
+    }
+
+
 # ADDING
 
 
@@ -232,5 +246,54 @@ def edit_book(book_id):
         "authors": authors,
         "categories": categories,
         "publishers": publishers,
+        "flashes": get_flashed_messages(with_categories=True),
+    }
+
+
+@api.route("/edit-user/<int:user_id>", methods=("GET", "PATCH"))
+@moderator_required_api
+def edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    roles = [(role.id, role.name) for role in Role.query.filter_by()]
+
+    if request.method == "PATCH":
+        error = False
+        user_by_email = User.query.filter_by(email=request.args.get("email")).first()
+        personal_data_by_number = PersonalData.query.filter_by(
+            phone_number=request.args.get("phone_number")
+        ).first()
+        if user_by_email and user_by_email is not user:
+            flash("Ten email jest już przypisany.", "danger")
+            error = True
+        if (
+            personal_data_by_number
+            and personal_data_by_number is not user.personal_data[0]
+        ):
+            flash("Ten numer telefonu jest już przypisany.", "danger")
+            error = True
+
+        if error:
+            return {
+                "flashes": get_flashed_messages(with_categories=True),
+                "user": dict_user(user),
+                "roles": roles,
+            }
+
+        user.personal_data[0].name = request.args.get("name")
+        user.personal_data[0].surname = request.args.get("surname")
+        user.personal_data[0].phone_number = request.args.get("phone_number")
+        user.personal_data[0].extended_city = request.args.get("extended_city")
+        user.personal_data[0].extended_street = request.args.get("extended_street")
+        user.email = request.args.get("email")
+        user.role_id = request.args.get("role")
+        user.activated = request.args.get("activated")
+        db.session.commit()
+
+        flash("Pomyślnie zedytowano dane.", "success")
+
+    return {
+        "user": dict_user(user),
+        "roles": roles,
         "flashes": get_flashed_messages(with_categories=True),
     }

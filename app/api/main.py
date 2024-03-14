@@ -18,11 +18,13 @@ from ..models import Borrow
 from app.api.decorators import login_required_api
 
 
-@api.before_request
-def check_if_activated():
-    if current_user.is_authenticated and not current_user.activated:
-        flash("Aktywuj swoje konto przez zmianę hasła.", "warning")
-        return jsonify({"flashes": get_flashed_messages()}), 403
+# @api.before_request
+# def check_if_activated():
+#     if current_user.is_authenticated and not current_user.activated:
+#         print(current_user.is_authenticated)
+#         print(current_user.activated)
+#         flash("Aktywuj swoje konto przez zmianę hasła.", "warning")
+#         return jsonify({"flashes": get_flashed_messages()}), 403
 
 
 def process_covers(books):
