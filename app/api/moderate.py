@@ -287,7 +287,7 @@ def edit_user(user_id):
         user.personal_data[0].extended_street = request.args.get("extended_street")
         user.email = request.args.get("email")
         user.role_id = request.args.get("role")
-        user.activated = request.args.get("activated")
+        user.activated = bool(int(request.args.get("activated")))
         db.session.commit()
 
         flash("Pomyślnie zedytowano dane.", "success")
@@ -295,5 +295,182 @@ def edit_user(user_id):
     return {
         "user": dict_user(user),
         "roles": roles,
+        "flashes": get_flashed_messages(with_categories=True),
+    }
+
+
+# ACTIONS
+
+
+@api.route("/borrow-book/<int:book_id>", methods=("GET", "PUT"))
+@moderator_required_api
+def borrow_book(book_id):
+    users = [(user.id, f"{user.full_name} ({ user.id })") for user in User.query.all()]
+    book = Book.query.get_or_404(book_id)
+    borrows = [borrow for borrow in book.borrows if borrow.return_date is None]
+    if len(borrows) >= book.number_of_copies:
+        flash("Brak dostępnych kopii do wypożyczenia.", "danger")
+        return {
+            "book_id": book.id,
+            "flashes": get_flashed_messages(with_categories=True),
+        }
+
+    if request.method == "PUT":
+        user_id = request.args.get("user_id")
+        if User.query.get(user_id) is None:
+            flash("Brak użytkownika o tym ID.", "danger")
+            return {
+                "book_id": book.id,
+                "flashes": get_flashed_messages(with_categories=True),
+            }
+        borrow = Borrow(
+            user_id=user_id,
+            book_id=book.id,
+            predicted_return_date=datetime.datetime.now()
+            + datetime.timedelta(days=current_app.config["DEFAULT_BORROWING_DAYS"]),
+        )
+        db.session.add(borrow)
+        db.session.commit()
+        flash("Pomyślnie wypożyczono książkę.", "success")
+        return {
+            "book_id": book.id,
+            "flashes": get_flashed_messages(with_categories=True),
+        }
+
+    return {
+        "book": dict_book(book, None),
+        "users": users,
+        "flashes": get_flashed_messages(with_categories=True),
+    }
+
+
+@api.route("/return-book/<int:borrow_id>", methods=(["PATCH"]))
+@moderator_required_api
+def return_book(borrow_id):
+    borrow = Borrow.query.get_or_404(borrow_id)
+    if borrow.return_date:
+        flash("Ta książka została już zwrócona.", "danger")
+        return {
+            "user_id": borrow.user_id,
+            "flashes": get_flashed_messages(with_categories=True),
+        }
+    borrow.return_date = datetime.datetime.now()
+    db.session.commit()
+    flash("Zwrot książki przebiegł pomyślnie.", "success")
+    return {
+        "user_id": borrow.user_id,
+        "flashes": get_flashed_messages(with_categories=True),
+    }
+
+
+@api.route("/prolong-borrow/<int:borrow_id>", methods=(["PATCH"]))
+def prolong_borrow(borrow_id):
+    borrow = Borrow.query.get_or_404(borrow_id)
+    if not current_user.can(Permission.MODERATOR):
+        if borrow.user_id != current_user.id:
+            abort(403)
+
+    max_prolong = current_app.config["MAX_PROLONG_TIMES"]
+
+    if borrow.return_date:
+        flash("Ta książka została już zwrócona.", "danger")
+    elif borrow.prolong_times >= max_prolong:
+        flash(f"Wykorzystano maksymalną liczbę przedłużeń ({max_prolong}).", "danger")
+    else:
+        borrow.predicted_return_date += datetime.timedelta(
+            days=current_app.config["PROLONG_DAYS"]
+        )
+        borrow.prolong_times += 1
+        db.session.commit()
+        flash(f"Pomyślnie przedłużono wypożyczenie.", "success")
+
+    return {
+        "user_id": borrow.user_id,
+        "flashes": get_flashed_messages(with_categories=True),
+    }
+
+
+def delete_object(object_id, model):
+    obj = model.query.get_or_404(object_id)
+    db.session.delete(obj)
+    db.session.commit()
+
+
+@api.route("/delete-user/<int:user_id>", methods=(["DELETE"]))
+@admin_required_api
+def delete_user(user_id):
+    delete_object(user_id, User)
+    flash("Pomyślnie usunięto użytkownika.", "success")
+    return {
+        "flashes": get_flashed_messages(with_categories=True),
+    }
+
+
+@api.route("/delete-book/<int:book_id>", methods=(["DELETE"]))
+@admin_required_api
+def delete_book(book_id):
+    delete_object(book_id, Book)
+    flash("Poprawnie usunięto książkę.", "success")
+    return {
+        "flashes": get_flashed_messages(with_categories=True),
+    }
+
+
+@api.route("/delete-borrow/<int:borrow_id>", methods=(["DELETE"]))
+@admin_required_api
+def delete_borrow(borrow_id):
+    delete_object(borrow_id, Borrow)
+    flash("Poprawnie usunięto wypożyczenie.", "success")
+    return {
+        "flashes": get_flashed_messages(with_categories=True),
+    }
+
+
+# LISTING
+
+
+@api.route("/list-users", methods=("GET", "POST"))
+@moderator_required_api
+def list_users():
+    phrase = request.args.get("phrase", "")
+
+    if phrase:
+        if " " in phrase:
+            # name and surname
+            phrase = phrase.title()
+            splitted_phrase = phrase.split()
+            users = (
+                User.query.join(PersonalData)
+                .filter(
+                    PersonalData.name.in_(splitted_phrase),
+                    PersonalData.surname.in_(splitted_phrase),
+                )
+                .order_by(PersonalData.surname)
+            )
+        else:
+            # id, only name, only surname
+            try:
+                int(phrase)
+                users = (
+                    User.query.join(PersonalData)
+                    .filter_by(id=phrase)
+                    .order_by(PersonalData.surname)
+                )
+            except:
+                users = (
+                    User.query.join(PersonalData)
+                    .filter(
+                        or_(
+                            PersonalData.name.ilike(f"%{phrase}%"),
+                            PersonalData.surname.ilike(f"%{phrase}%"),
+                        )
+                    )
+                    .order_by(PersonalData.surname)
+                )
+    else:
+        users = User.query.join(PersonalData).order_by(PersonalData.surname)
+
+    return {
+        "users": [dict_user(user) for user in users],
         "flashes": get_flashed_messages(with_categories=True),
     }

@@ -9,27 +9,28 @@
     <div class="d-flex justify-content-center my-5">
         <ul class="list-group" style="min-width: 40%;">
             {% if borrows %}
-                {% for borrow in borrows %}
-                    <li class="list-group-item">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <a href="{{ url_for('moderate.list_users', phrase=borrow.user_id) }}" class="link-dark">{{ borrow.user.full_name }}</a>
-                                <span class="text-muted">({{ borrow.user_id }})</span> <br>
-                                <span class="text-muted">{{ borrow.book.title }}</span>
-                                <span class="text-muted">({{ borrow.book.isbn }})</span> <br>
-                                {% include "moderate/includes/borrow_info.html" %}
-                            </div>
-                            <div>
-                                {% include "moderate/includes/borrow_buttons.html" %}
-                            </div>
-                        </div>
-                    </li>
-                {% endfor %}
+            {% for borrow in borrows %}
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a href="{{ url_for('moderate.list_users', phrase=borrow.user_id) }}" class="link-dark">{{
+                            borrow.user.full_name }}</a>
+                        <span class="text-muted">({{ borrow.user_id }})</span> <br>
+                        <span class="text-muted">{{ borrow.book.title }}</span>
+                        <span class="text-muted">({{ borrow.book.isbn }})</span> <br>
+                        {% include "moderate/includes/borrow_info.html" %}
+                    </div>
+                    <div>
+                        {% include "moderate/includes/borrow_buttons.html" %}
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
             {% else %}
-                <h2 class="text-muted text-center">Brak wypożyczeń...</h2>
+            <h2 class="text-muted text-center">Brak wypożyczeń...</h2>
             {% endif %}
             <div>&nbsp;</div>
-            {{ render_pagination(pagination, "moderate.list_borrows_users") }}
+            {{ render_pagination(pagination, "moderate.all_borrows") }}
         </ul>
     </div>
 </div>
