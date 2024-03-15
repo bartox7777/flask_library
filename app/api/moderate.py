@@ -474,3 +474,79 @@ def list_users():
         "users": [dict_user(user) for user in users],
         "flashes": get_flashed_messages(with_categories=True),
     }
+
+
+@api.route("/list-borrows-books/", methods=(["GET"]))
+@moderator_required_api
+def list_borrows_books():
+    user_id = request.args.get("user_id", None, type=int)
+    if user_id is None:
+        abort(404)
+
+    user = User.query.get_or_404(user_id)
+
+    borrowed_books = Borrow.query.filter_by(user_id=user.id).order_by(
+        Borrow.return_date.desc().nullsfirst()
+    )
+
+    return {
+        "borrowed_books": [
+            {
+                "id": borrow.id,
+                "book": dict_book(borrow.book, None),
+                "predicted_return_date": borrow.predicted_return_date,
+                "return_date": borrow.return_date,
+                "prolong_times": borrow.prolong_times,
+            }
+            for borrow in borrowed_books
+        ],
+        "max_prolongs": current_app.config["MAX_PROLONG_TIMES"],
+    }
+
+
+@api.route("/list-borrows-users")
+@moderator_required_api
+def list_borrows_users():
+    book_id = request.args.get("book_id", None, int)
+    if book_id is None:
+        abort(404)
+
+    book = Book.query.get_or_404(book_id)
+    borrows = Borrow.query.filter_by(book_id=book.id).order_by(
+        Borrow.return_date.desc().nullsfirst()
+    )
+
+    return {
+        "borrows": [
+            {
+                "id": borrow.id,
+                "user": dict_user(borrow.user),
+                "predicted_return_date": borrow.predicted_return_date,
+                "return_date": borrow.return_date,
+                "prolong_times": borrow.prolong_times,
+            }
+            for borrow in borrows
+        ],
+        "max_prolongs": current_app.config["MAX_PROLONG_TIMES"],
+    }
+
+
+@api.route("/all-borrows", methods=("GET", "POST"))
+@moderator_required_api
+def all_borrows():
+    borrows = Borrow.query.order_by(Borrow.return_date.desc().nullsfirst())
+
+    return {
+        "borrows": [
+            {
+                "id": borrow.id,
+                "user": dict_user(borrow.user),
+                "book": dict_book(borrow.book, None),
+                "predicted_return_date": borrow.predicted_return_date,
+                "return_date": borrow.return_date,
+                "prolong_times": borrow.prolong_times,
+            }
+            for borrow in borrows
+        ],
+        "max_prolongs": current_app.config["MAX_PROLONG_TIMES"],
+    }
