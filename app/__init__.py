@@ -79,6 +79,4 @@ def create_app(config_name="production"):
     return app
 
 
-if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True)
+GUNICORN_APP = create_app()
