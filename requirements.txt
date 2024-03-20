@@ -15,6 +15,7 @@ Flask-Migrate==3.0.1
 Flask-SQLAlchemy==2.5.1
 Flask-WTF==0.15.1
 greenlet==1.1.0
+gunicorn==20.0.4
 idna==3.2
 isbnlib==3.10.8
 itsdangerous==2.0.1
