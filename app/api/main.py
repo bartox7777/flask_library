@@ -34,9 +34,7 @@ def process_covers(books):
         cover_file_like = io.BytesIO()
         cover.save(cover_file_like, cover.format)
         cover_file_like.seek(0)
-        processed_covers.append(
-            f"data:image/{cover.format.lower()};base64,{b64encode(cover_file_like.read()).decode()}"
-        )
+        processed_covers.append(f"base64,{b64encode(cover_file_like.read()).decode()}")
 
     return list(zip(books, processed_covers))
 
