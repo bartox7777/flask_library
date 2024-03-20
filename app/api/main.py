@@ -80,46 +80,39 @@ def index():
 
 @api.route("/search/", methods=(["GET"]))
 def search():
-    page = request.args.get("page", 1, type=int)
     search_by = request.args.get("search_by", "phrase")
     phrase = request.args.get("phrase", "")
 
     if search_by == "phrase":
-        found_books = (
-            Book.query.join(Author, Author.id == Book.author_id)
-            .filter(
-                or_(
-                    Book.title.ilike(f"%{phrase}%"),
-                    Book.description.ilike(f"%{phrase}%"),
-                    Book.publisher.ilike(f"%{phrase}%"),
-                    Author.full_name.ilike(f"%{phrase}%"),
-                )
+        found_books = Book.query.join(Author, Author.id == Book.author_id).filter(
+            or_(
+                Book.title.ilike(f"%{phrase}%"),
+                Book.description.ilike(f"%{phrase}%"),
+                Book.publisher.ilike(f"%{phrase}%"),
+                Author.full_name.ilike(f"%{phrase}%"),
             )
-            .paginate(page, current_app.config["BOOKS_PER_PAGE"])
         )
     elif search_by == "title":
         found_books = Book.query.filter(
             Book.title.ilike(f"%{phrase}%"),
-        ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
+        )
     elif search_by == "category":
         found_books = Book.query.filter(
             Book.category.ilike(f"%{phrase}%"),
-        ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
+        )
     elif search_by == "author":
-        found_books = (
-            Book.query.join(Author, Author.id == Book.author_id)
-            .filter(Author.full_name.ilike(f"%{phrase}%"))
-            .paginate(page, current_app.config["BOOKS_PER_PAGE"])
+        found_books = Book.query.join(Author, Author.id == Book.author_id).filter(
+            Author.full_name.ilike(f"%{phrase}%")
         )
     elif search_by == "publisher":
         found_books = Book.query.filter(
             Book.publisher.ilike(f"%{phrase}%"),
-        ).paginate(page, current_app.config["BOOKS_PER_PAGE"])
+        )
     else:
-        found_books = Book.query.paginate(page, current_app.config["BOOKS_PER_PAGE"])
+        found_books = Book.query.all()
 
     return jsonify(
-        [dict_book(book, cover) for book, cover in process_covers(found_books.items)]
+        [dict_book(book, cover) for book, cover in process_covers(found_books)]
     )
 
 
