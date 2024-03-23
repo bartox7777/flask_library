@@ -48,18 +48,18 @@ def process_covers(books):
 
 def dict_book(book, cover):
     return {
-        "book_id": book.id,
+        "book_id": str(book.id),
         "isbn": book.isbn,
         "title": book.title,
         "category": book.category,
         "description": book.description,
         "author": process_author(book.author_id),
         "add_date": book.add_date,
-        "number_of_copies": book.number_of_copies,
+        "number_of_copies": str(book.number_of_copies),
         "cover": cover,
         "publisher": book.publisher,
-        "pages": book.pages,
-        "year": book.year,
+        "pages": str(book.pages),
+        "year": str(book.year),
     }
 
 
