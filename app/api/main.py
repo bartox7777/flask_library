@@ -31,7 +31,7 @@ def process_author(author_id):
     author = Author.query.get(author_id)
     if author is None:
         return {"author_id": None, "full_name": None}
-    return {"author_id": author.id, "full_name": author.full_name}
+    return {"author_id": str(author.id), "full_name": author.full_name}
 
 
 def process_covers(books):
