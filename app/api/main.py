@@ -27,6 +27,13 @@ from app.api.decorators import login_required_api
 #         return jsonify({"flashes": get_flashed_messages()}), 403
 
 
+def process_author(author_id):
+    author = Author.query.get(author_id)
+    if author is None:
+        return {"author_id": None, "full_name": None}
+    return {"author_id": author.id, "full_name": author.full_name}
+
+
 def process_covers(books):
     processed_covers = []
     for book in books:
@@ -46,7 +53,7 @@ def dict_book(book, cover):
         "title": book.title,
         "category": book.category,
         "description": book.description,
-        "author_id": book.author_id,
+        "author": process_author(book.author_id),
         "add_date": book.add_date,
         "number_of_copies": book.number_of_copies,
         "cover": cover,
