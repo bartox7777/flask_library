@@ -1,3 +1,5 @@
+import base64
+from io import BytesIO
 from flask import flash
 from flask import abort
 from flask import request
@@ -220,11 +222,8 @@ def edit_book(book_id):
         book.publisher = request.args.get("publisher")
         book.pages = request.args.get("pages")
         book.year = request.args.get("year")
-        cover = (
-            request.files["cover"].stream.read() if request.files.get("cover") else ""
-        )
-        if len(cover) > 0:
-            book.cover = cover
+        base64_cover = request.args.get("cover")
+        book.cover = BytesIO(base64.b64decode(base64_cover)).read()
         db.session.commit()
 
         flash("Edycja książki przebiegła pomyślnie.", "success")
