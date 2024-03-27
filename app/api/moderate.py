@@ -210,7 +210,7 @@ def add_user():
 
 
 @api.route("/edit-book/<int:book_id>", methods=("GET", "PATCH"))
-# @moderator_required_api
+@moderator_required_api
 def edit_book(book_id):
     book = Book.query.get_or_404(book_id)
 
