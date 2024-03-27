@@ -2,7 +2,7 @@ from flask import flash
 from flask import jsonify
 from flask import request
 from flask import current_app
-from flask import get_flashed_messages(with_categories=True)
+from flask import get_flashed_messages
 
 import io
 from PIL import Image
