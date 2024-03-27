@@ -217,13 +217,16 @@ def edit_book(book_id):
         book.title = request.args.get("title")
         book.category = request.args.get("category")
         book.description = request.args.get("description")
-        book.author_id = int(request.args.get("author"))
+        book.author_id = request.args.get("author")
         book.number_of_copies = request.args.get("number_of_copies")
         book.publisher = request.args.get("publisher")
         book.pages = request.args.get("pages")
         book.year = request.args.get("year")
         base64_cover = request.args.get("cover")
         book.cover = BytesIO(base64.b64decode(base64_cover)).read()
+
+        Author.id.get_or_404(book.author_id)
+
         db.session.commit()
 
         flash("Edycja książki przebiegła pomyślnie.", "success")
