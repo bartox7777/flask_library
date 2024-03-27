@@ -24,7 +24,7 @@ from app.api.decorators import login_required_api
 #         print(current_user.is_authenticated)
 #         print(current_user.activated)
 #         flash("Aktywuj swoje konto przez zmianę hasła.", "warning")
-#         return jsonify({"flashes": get_flashed_messages(with_categories=True)()}), 403
+#         return jsonify({"flashes": get_flashed_messages(with_categories=True)}), 403
 
 
 def process_author(author_id):

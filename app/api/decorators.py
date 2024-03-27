@@ -12,7 +12,7 @@ def login_required_api(view):
         if not current_user.is_authenticated:
             flash("Musisz być zalogowany, aby wykonać tę akcję.", "warning")
             return (
-                jsonify({"flashes": get_flashed_messages(with_categories=True)()}),
+                jsonify({"flashes": get_flashed_messages(with_categories=True)}),
                 401,
             )
         return view(*args, **kwargs)
@@ -29,7 +29,7 @@ def moderator_required_api(view):
                 "Musisz mieć uprawnienia moderatora, aby wykonać tę akcję.", "warning"
             )
             return (
-                jsonify({"flashes": get_flashed_messages(with_categories=True)()}),
+                jsonify({"flashes": get_flashed_messages(with_categories=True)}),
                 401,
             )
         return view(*args, **kwargs)
@@ -47,7 +47,7 @@ def admin_required_api(view):
                 "warning",
             )
             return (
-                jsonify({"flashes": get_flashed_messages(with_categories=True)()}),
+                jsonify({"flashes": get_flashed_messages(with_categories=True)}),
                 401,
             )
         return view(*args, **kwargs)

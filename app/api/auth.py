@@ -20,7 +20,7 @@ from flask_login import current_user
 def login():
     if current_user.is_authenticated:
         flash("Jesteś już zalogowany.", "warning")
-        return jsonify({"flashes": get_flashed_messages(with_categories=True)()})
+        return jsonify({"flashes": get_flashed_messages(with_categories=True)})
 
     email = request.args.get("email")
     password = request.args.get("password")
@@ -40,11 +40,11 @@ def login():
         if delayed_borrows > 0:
             flash("Czas na zwrot niektórych książek.", "warning")
 
-        return jsonify({"flashes": get_flashed_messages(with_categories=True)()})
+        return jsonify({"flashes": get_flashed_messages(with_categories=True)})
 
     flash("Nieprawidłowe dane logowania.", "warning")
 
-    return jsonify({"flashes": get_flashed_messages(with_categories=True)()})
+    return jsonify({"flashes": get_flashed_messages(with_categories=True)})
 
 
 @api.route("/logout", methods=(["POST"]))
@@ -52,7 +52,7 @@ def login():
 def logout():
     flash("Pomyślnie wylogowano.", "success")
     logout_user()
-    return jsonify({"flashes": get_flashed_messages(with_categories=True)()})
+    return jsonify({"flashes": get_flashed_messages(with_categories=True)})
 
 
 @api.route("/change-password", methods=(["POST"]))
@@ -70,4 +70,4 @@ def change_password():
         db.session.commit()
         flash("Zmiana hasła przebiegła pomyślnie.", "success")
 
-    return jsonify({"flashes": get_flashed_messages(with_categories=True)()})
+    return jsonify({"flashes": get_flashed_messages(with_categories=True)})
