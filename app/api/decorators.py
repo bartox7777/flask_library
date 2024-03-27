@@ -1,4 +1,4 @@
-from flask import flash, get_flashed_messages, jsonify
+from flask import flash, get_flashed_messages(with_categories=True), jsonify
 
 from functools import wraps
 from flask_login import current_user
@@ -11,7 +11,7 @@ def login_required_api(view):
     def is_authenticated(*args, **kwargs):
         if not current_user.is_authenticated:
             flash("Musisz być zalogowany, aby wykonać tę akcję.", "warning")
-            return jsonify({"flashes": get_flashed_messages()}), 401
+            return jsonify({"flashes": get_flashed_messages(with_categories=True)()}), 401
         return view(*args, **kwargs)
 
     return is_authenticated
@@ -25,7 +25,7 @@ def moderator_required_api(view):
             flash(
                 "Musisz mieć uprawnienia moderatora, aby wykonać tę akcję.", "warning"
             )
-            return jsonify({"flashes": get_flashed_messages()}), 401
+            return jsonify({"flashes": get_flashed_messages(with_categories=True)()}), 401
         return view(*args, **kwargs)
 
     return check_permissions
@@ -40,7 +40,7 @@ def admin_required_api(view):
                 "Musisz mieć uprawnienia administratora, aby wykonać tę akcję.",
                 "warning",
             )
-            return jsonify({"flashes": get_flashed_messages()}), 401
+            return jsonify({"flashes": get_flashed_messages(with_categories=True)()}), 401
         return view(*args, **kwargs)
 
     return check_permissions

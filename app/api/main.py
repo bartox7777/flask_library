@@ -2,7 +2,7 @@ from flask import flash
 from flask import jsonify
 from flask import request
 from flask import current_app
-from flask import get_flashed_messages
+from flask import get_flashed_messages(with_categories=True)
 
 import io
 from PIL import Image
@@ -24,7 +24,7 @@ from app.api.decorators import login_required_api
 #         print(current_user.is_authenticated)
 #         print(current_user.activated)
 #         flash("Aktywuj swoje konto przez zmianę hasła.", "warning")
-#         return jsonify({"flashes": get_flashed_messages()}), 403
+#         return jsonify({"flashes": get_flashed_messages(with_categories=True)()}), 403
 
 
 def process_author(author_id):

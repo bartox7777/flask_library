@@ -194,13 +194,15 @@ def add_user():
             flash(f"Hasło zostało wysłane na podanego e-maila.", "info")
             return {
                 "user_id": new_user.id,
-                "flashes": get_flashed_messages(with_categories=True),
+                "flashes": get_flashed_messages(with_categories=True)(
+                    with_categories=True
+                ),
             }
 
     return {
         "roles": roles,
         "role_user_id": role_user_id,
-        "flashes": get_flashed_messages(with_categories=True),
+        "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
     }
 
 
@@ -231,7 +233,7 @@ def edit_book(book_id):
 
         flash("Edycja książki przebiegła pomyślnie.", "success")
         return {
-            "flashes": get_flashed_messages(with_categories=True),
+            "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
             "book_id": book.id,
         }
 
@@ -248,7 +250,7 @@ def edit_book(book_id):
         "authors": authors,
         "categories": categories,
         "publishers": publishers,
-        "flashes": get_flashed_messages(with_categories=True),
+        "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
     }
 
 
@@ -277,7 +279,9 @@ def edit_user(user_id):
 
         if error:
             return {
-                "flashes": get_flashed_messages(with_categories=True),
+                "flashes": get_flashed_messages(with_categories=True)(
+                    with_categories=True
+                ),
                 "user": dict_user(user),
                 "roles": roles,
             }
@@ -297,7 +301,7 @@ def edit_user(user_id):
     return {
         "user": dict_user(user),
         "roles": roles,
-        "flashes": get_flashed_messages(with_categories=True),
+        "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
     }
 
 
@@ -314,7 +318,7 @@ def borrow_book(book_id):
         flash("Brak dostępnych kopii do wypożyczenia.", "danger")
         return {
             "book_id": book.id,
-            "flashes": get_flashed_messages(with_categories=True),
+            "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
         }
 
     if request.method == "PUT":
@@ -323,7 +327,9 @@ def borrow_book(book_id):
             flash("Brak użytkownika o tym ID.", "danger")
             return {
                 "book_id": book.id,
-                "flashes": get_flashed_messages(with_categories=True),
+                "flashes": get_flashed_messages(with_categories=True)(
+                    with_categories=True
+                ),
             }
         borrow = Borrow(
             user_id=user_id,
@@ -336,13 +342,13 @@ def borrow_book(book_id):
         flash("Pomyślnie wypożyczono książkę.", "success")
         return {
             "book_id": book.id,
-            "flashes": get_flashed_messages(with_categories=True),
+            "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
         }
 
     return {
         "book": dict_book(book, None),
         "users": users,
-        "flashes": get_flashed_messages(with_categories=True),
+        "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
     }
 
 
@@ -354,14 +360,14 @@ def return_book(borrow_id):
         flash("Ta książka została już zwrócona.", "danger")
         return {
             "user_id": borrow.user_id,
-            "flashes": get_flashed_messages(with_categories=True),
+            "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
         }
     borrow.return_date = datetime.datetime.now()
     db.session.commit()
     flash("Zwrot książki przebiegł pomyślnie.", "success")
     return {
         "user_id": borrow.user_id,
-        "flashes": get_flashed_messages(with_categories=True),
+        "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
     }
 
 
@@ -388,7 +394,7 @@ def prolong_borrow(borrow_id):
 
     return {
         "user_id": borrow.user_id,
-        "flashes": get_flashed_messages(with_categories=True),
+        "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
     }
 
 
@@ -404,7 +410,7 @@ def delete_user(user_id):
     delete_object(user_id, User)
     flash("Pomyślnie usunięto użytkownika.", "success")
     return {
-        "flashes": get_flashed_messages(with_categories=True),
+        "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
     }
 
 
@@ -414,7 +420,7 @@ def delete_book(book_id):
     delete_object(book_id, Book)
     flash("Poprawnie usunięto książkę.", "success")
     return {
-        "flashes": get_flashed_messages(with_categories=True),
+        "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
     }
 
 
@@ -424,7 +430,7 @@ def delete_borrow(borrow_id):
     delete_object(borrow_id, Borrow)
     flash("Poprawnie usunięto wypożyczenie.", "success")
     return {
-        "flashes": get_flashed_messages(with_categories=True),
+        "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
     }
 
 
@@ -474,7 +480,7 @@ def list_users():
 
     return {
         "users": [dict_user(user) for user in users],
-        "flashes": get_flashed_messages(with_categories=True),
+        "flashes": get_flashed_messages(with_categories=True)(with_categories=True),
     }
 
 
