@@ -44,7 +44,7 @@ def login():
 
     flash("Nieprawidłowe dane logowania.", "warning")
 
-    return jsonify({"flashes": get_flashed_messages(with_categories=True)})
+    return jsonify({"flashes": get_flashed_messages(with_categories=True)}), 401
 
 
 @api.route("/logout", methods=(["POST"]))
