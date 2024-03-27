@@ -225,7 +225,7 @@ def edit_book(book_id):
         base64_cover = request.args.get("cover")
         book.cover = BytesIO(base64.b64decode(base64_cover)).read()
 
-        Author.id.get_or_404(book.author_id)
+        Author.query.get_or_404(book.author_id)
 
         db.session.commit()
 
