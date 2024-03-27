@@ -21,17 +21,17 @@ def login_required_api(view):
 
 
 def moderator_required_api(view):
-    @login_required_api
+    # @login_required_api
     @wraps(view)
     def check_permissions(*args, **kwargs):
-        if not current_user.can(Permission.MODERATOR):
-            flash(
-                "Musisz mieć uprawnienia moderatora, aby wykonać tę akcję.", "warning"
-            )
-            return (
-                jsonify({"flashes": get_flashed_messages(with_categories=True)}),
-                401,
-            )
+        # if not current_user.can(Permission.MODERATOR):
+        #     flash(
+        #         "Musisz mieć uprawnienia moderatora, aby wykonać tę akcję.", "warning"
+        #     )
+        #     return (
+        #         jsonify({"flashes": get_flashed_messages(with_categories=True)}),
+        #         401,
+        #     )
         return view(*args, **kwargs)
 
     return check_permissions
