@@ -97,11 +97,7 @@ def add_book():
             description=request.args.get("description"),
             author_id=author_id,
             number_of_copies=request.args.get("number_of_copies"),
-            cover=(
-                request.files["cover"].stream.read()
-                if request.files.get("cover")
-                else None
-            ),
+            cover=(request.files.get("cover") if request.files.get("cover") else None),
             publisher=publisher,
             pages=request.args.get("pages"),
             year=request.args.get("year"),
@@ -111,7 +107,6 @@ def add_book():
         db.session.commit()
         return {"book_id": new_book.id}
     elif request.method == "POST" and request.args.get("isbn"):
-        print("POST")
         isbn = clean(request.args.get("isbn"))
         if is_isbn10(isbn) or is_isbn13(isbn):
             book_info = meta(isbn)
