@@ -97,7 +97,7 @@ def add_book():
             description=request.args.get("description"),
             author_id=author_id,
             number_of_copies=request.args.get("number_of_copies"),
-            cover=BytesIO(base64.b64decode(request.files.get("cover"))).read(),
+            cover=BytesIO(base64.b64decode(request.args.get("cover"))).read(),
             publisher=publisher,
             pages=request.args.get("pages"),
             year=request.args.get("year"),
