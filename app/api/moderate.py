@@ -105,7 +105,11 @@ def add_book():
 
         db.session.add(new_book)
         db.session.commit()
-        return {"book_id": new_book.id}
+        flash("Książka dodana pomyślnie.", "success")
+        return {
+            "book_id": new_book.id,
+            "flashes": get_flashed_messages(with_categories=True),
+        }
     elif request.method == "POST" and request.args.get("isbn"):
         isbn = clean(request.args.get("isbn"))
         if is_isbn10(isbn) or is_isbn13(isbn):
