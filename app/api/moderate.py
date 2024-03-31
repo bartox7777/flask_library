@@ -193,9 +193,7 @@ def add_user():
             flash(f"Hasło zostało wysłane na podanego e-maila.", "info")
             return {
                 "user_id": new_user.id,
-                "flashes": get_flashed_messages(with_categories=True)(
-                    with_categories=True
-                ),
+                "flashes": get_flashed_messages(with_categories=True),
             }
 
     return {
@@ -278,9 +276,7 @@ def edit_user(user_id):
 
         if error:
             return {
-                "flashes": get_flashed_messages(with_categories=True)(
-                    with_categories=True
-                ),
+                "flashes": get_flashed_messages(with_categories=True),
                 "user": dict_user(user),
                 "roles": roles,
             }
@@ -326,9 +322,7 @@ def borrow_book(book_id):
             flash("Brak użytkownika o tym ID.", "danger")
             return {
                 "book_id": book.id,
-                "flashes": get_flashed_messages(with_categories=True)(
-                    with_categories=True
-                ),
+                "flashes": get_flashed_messages(with_categories=True),
             }
         borrow = Borrow(
             user_id=user_id,
