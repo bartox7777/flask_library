@@ -310,7 +310,7 @@ def borrow_book(book_id):
     book = Book.query.get_or_404(book_id)
     borrows = [borrow for borrow in book.borrows if borrow.return_date is None]
     if len(borrows) >= book.number_of_copies:
-        flash("Brak dostępnych kopii do wypożyczenia.", "danger")
+        flash("Brak dostępnych kopii do wypożyczenia.", "danger"), 409
         return {
             "book_id": book.id,
             "flashes": get_flashed_messages(with_categories=True),
